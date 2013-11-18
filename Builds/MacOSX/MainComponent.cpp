@@ -82,7 +82,7 @@ void MainComponent::comboBoxChanged(juce::ComboBox *box)
     if (fftSizeBox == box)
     {
         fft_size = FFTSizes[box->getSelectedItemIndex()];
-        std::cout << fft_size << std::endl;
+        log("FFT Size: " + String(fft_size) + "\n");
     }
 }
 

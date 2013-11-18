@@ -36,7 +36,8 @@ private:
     double* input;
     fftw_complex* output;
     int fft_size;
-    
+    int overlap = 4;
+    int hop_size;
     int minBin, maxBin;
     double* input_buffer;
     double* magnitudes;

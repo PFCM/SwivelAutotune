@@ -2376,8 +2376,8 @@
 				E322B5A2415D1B86C038AEA6 /* MainComponent.cpp */,
 				68AA62C88C4F2DFB537A7F2A /* MainComponent.h */,
 				32FFA1441839B56700598F52 /* String.cpp */,
-				32FFA1481839C7DF00598F52 /* Windowing.h */,
 				32FFA1451839B56700598F52 /* String.h */,
+				32FFA1481839C7DF00598F52 /* Windowing.h */,
 				60CF87C6894023421FA1DAEC /* Main.cpp */,
 			);
 			name = Source;

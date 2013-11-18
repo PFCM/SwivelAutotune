@@ -8,6 +8,7 @@
 
 #include "String.h"
 #include "Windowing.h"
+#include <Accelerate/Accelerate.h>
 
 //===========================================================
 SwivelString::SwivelString(fftw_plan plan, double* in, fftw_complex* out, int size) : fft_plan(plan),
@@ -17,6 +18,8 @@ SwivelString::SwivelString(fftw_plan plan, double* in, fftw_complex* out, int si
 {
     input_buffer = (double*) malloc(sizeof(double)*fft_size);
     magnitudes = (double*) malloc(sizeof(double)*fft_size/2);
+    
+    hop_size = fft_size/overlap;
 }
 
 SwivelString::~SwivelString()
@@ -34,7 +37,7 @@ void SwivelString::audioDeviceIOCallback(const float **inputChannelData,
 {
     // will need to:
     //          buffer audio to size of fft
-    //              TODO: overlap-add
+    //              TODO: overlap
     //          perform fft
     //          analyse
     static int input_index = 0;
@@ -46,7 +49,6 @@ void SwivelString::audioDeviceIOCallback(const float **inputChannelData,
     //          copy part of it in, process, copy the rest in to the front
     if ((fft_size-1) - input_index >= numSamples)
     {
-        // would love to vectorise but going between types isn't so much fun
         for (int i =0; i < numSamples; i++)
         {
             input_buffer[input_index+i] = inputChannelData[0][i];
@@ -86,6 +88,15 @@ void SwivelString::audioDeviceIOCallback(const float **inputChannelData,
                 peaks[t++] = i;
             }
         }
+        
+        
+        // shift buffer across by the hop size
+        // set index to the new end of the buffer
+        // hop size is fft_size/overlap samples
+        // memmove is like memcpy but is safe with overlapping regions
+        memmove(input_buffer, input_buffer+hop_size, sizeof(double)*fft_size-hop_size); // roll across one hop
+        input_index = fft_size-hop_size;
+    
     }
     
     if (remaining != 0)

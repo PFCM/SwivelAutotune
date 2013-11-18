@@ -37,7 +37,12 @@ private:
     fftw_complex* output;
     int fft_size;
     
+    int minBin, maxBin;
     double* input_buffer;
+    double* magnitudes;
+    
+    //=============================================
+    double magnitude(fftw_complex);
 };
 
 #endif /* defined(__SwivelAutotune__String__) */

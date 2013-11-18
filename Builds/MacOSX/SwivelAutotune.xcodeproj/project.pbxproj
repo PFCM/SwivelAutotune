@@ -13,6 +13,7 @@
 		21B6438A0252A0AF0C375C99 /* Carbon.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = 41D6C712F06C47C54753C2C5 /* Carbon.framework */; };
 		2B0FF0FCB8F7A318C4ABCD42 /* juce_audio_processors.mm in Sources */ = {isa = PBXBuildFile; fileRef = 719FB52ED246920763A39CC5 /* juce_audio_processors.mm */; };
 		32FFA1461839B56700598F52 /* String.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 32FFA1441839B56700598F52 /* String.cpp */; };
+		32FFA14B1839D26700598F52 /* libfftw3.3.dylib in Frameworks */ = {isa = PBXBuildFile; fileRef = 32FFA14A1839D26700598F52 /* libfftw3.3.dylib */; };
 		38FD7DA8D6B179989105CD62 /* juce_video.mm in Sources */ = {isa = PBXBuildFile; fileRef = F4AA7121685DE6A06FB9DE63 /* juce_video.mm */; };
 		3BF082B56A9BB431C1644197 /* juce_gui_extra.mm in Sources */ = {isa = PBXBuildFile; fileRef = 6A02BEAA4887D4FD3C95423C /* juce_gui_extra.mm */; };
 		40DCEB13E8B37B0F0D5E53DE /* juce_core.mm in Sources */ = {isa = PBXBuildFile; fileRef = D45F86B1F6F904D4000C9A9C /* juce_core.mm */; };
@@ -215,6 +216,7 @@
 		32FFA1441839B56700598F52 /* String.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; path = String.cpp; sourceTree = "<group>"; };
 		32FFA1451839B56700598F52 /* String.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = String.h; sourceTree = "<group>"; };
 		32FFA1481839C7DF00598F52 /* Windowing.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; name = Windowing.h; path = ../../Source/Windowing.h; sourceTree = "<group>"; };
+		32FFA14A1839D26700598F52 /* libfftw3.3.dylib */ = {isa = PBXFileReference; lastKnownFileType = "compiled.mach-o.dylib"; name = libfftw3.3.dylib; path = ../../../../../../usr/local/lib/libfftw3.3.dylib; sourceTree = "<group>"; };
 		331FD01BB7E3D247C478592A /* juce_AudioPluginFormatManager.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; name = juce_AudioPluginFormatManager.h; path = ../../JuceLibraryCode/modules/juce_audio_processors/format/juce_AudioPluginFormatManager.h; sourceTree = SOURCE_ROOT; };
 		33401D91CE1323C2706E98A7 /* juce_GraphicsContext.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; name = juce_GraphicsContext.h; path = ../../JuceLibraryCode/modules/juce_graphics/contexts/juce_GraphicsContext.h; sourceTree = SOURCE_ROOT; };
 		3362EB78E52399D2C9AE24BB /* juce_DropShadowEffect.cpp */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.cpp.cpp; name = juce_DropShadowEffect.cpp; path = ../../JuceLibraryCode/modules/juce_graphics/effects/juce_DropShadowEffect.cpp; sourceTree = SOURCE_ROOT; };
@@ -910,6 +912,7 @@
 			isa = PBXFrameworksBuildPhase;
 			buildActionMask = 2147483647;
 			files = (
+				32FFA14B1839D26700598F52 /* libfftw3.3.dylib in Frameworks */,
 				A4DB9CB7437E48616F120B77 /* Accelerate.framework in Frameworks */,
 				0B0131B8CDF59F6364575DFF /* AudioToolbox.framework in Frameworks */,
 				21B6438A0252A0AF0C375C99 /* Carbon.framework in Frameworks */,
@@ -2055,6 +2058,7 @@
 		AAF1DDD7DB47097E450A5AC3 /* Frameworks */ = {
 			isa = PBXGroup;
 			children = (
+				32FFA14A1839D26700598F52 /* libfftw3.3.dylib */,
 				3A0A46F42519B7AE1C79FE15 /* Accelerate.framework */,
 				ACEF8CB2A4E8C78C86D99909 /* AudioToolbox.framework */,
 				41D6C712F06C47C54753C2C5 /* Carbon.framework */,
@@ -2717,6 +2721,7 @@
 		7075F8EE00E78CC005F3DF43 /* Debug */ = {
 			isa = XCBuildConfiguration;
 			buildSettings = {
+				ARCHS = "$(ARCHS_STANDARD_32_BIT)";
 				CLANG_CXX_LANGUAGE_STANDARD = "c++0x";
 				CLANG_LINK_OBJC_RUNTIME = NO;
 				COMBINE_HIDPI_IMAGES = YES;
@@ -2737,9 +2742,11 @@
 				);
 				INFOPLIST_FILE = Info.plist;
 				INSTALL_PATH = "$(HOME)/Applications";
+				LIBRARY_SEARCH_PATHS = /usr/local/lib;
 				MACOSX_DEPLOYMENT_TARGET_ppc = 10.4;
 				ONLY_ACTIVE_ARCH = YES;
 				SDKROOT_ppc = macosx10.5;
+				VALID_ARCHS = i386;
 			};
 			name = Debug;
 		};
@@ -2786,6 +2793,7 @@
 		FB912A0F73BDB472493BCB98 /* Release */ = {
 			isa = XCBuildConfiguration;
 			buildSettings = {
+				ARCHS = "$(ARCHS_STANDARD_32_BIT)";
 				CLANG_CXX_LANGUAGE_STANDARD = "c++0x";
 				CLANG_LINK_OBJC_RUNTIME = NO;
 				COMBINE_HIDPI_IMAGES = YES;
@@ -2806,8 +2814,10 @@
 				);
 				INFOPLIST_FILE = Info.plist;
 				INSTALL_PATH = "$(HOME)/Applications";
+				LIBRARY_SEARCH_PATHS = /usr/local/lib;
 				MACOSX_DEPLOYMENT_TARGET_ppc = 10.4;
 				SDKROOT_ppc = macosx10.5;
+				VALID_ARCHS = i386;
 			};
 			name = Release;
 		};

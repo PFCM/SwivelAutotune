@@ -4,6 +4,9 @@
               bundleIdentifier="com.pfcm.SwivelAutotune" jucerVersion="3.1.0">
   <MAINGROUP id="xVfglz" name="SwivelAutotune">
     <GROUP id="{4596F9B5-8706-906C-83B8-DCF6F4DF2F26}" name="Source">
+      <FILE id="XFOtO8" name="MainComponent.cpp" compile="1" resource="0"
+            file="Builds/MacOSX/MainComponent.cpp"/>
+      <FILE id="hywIX8" name="MainComponent.h" compile="1" resource="0" file="Builds/MacOSX/MainComponent.h"/>
       <FILE id="SM6XyG" name="Main.cpp" compile="1" resource="0" file="Source/Main.cpp"/>
     </GROUP>
   </MAINGROUP>
@@ -22,6 +25,7 @@
     <MODULE id="juce_audio_devices" showAllCode="1" useLocalCopy="1"/>
     <MODULE id="juce_audio_formats" showAllCode="1" useLocalCopy="1"/>
     <MODULE id="juce_audio_processors" showAllCode="1" useLocalCopy="1"/>
+    <MODULE id="juce_audio_utils" showAllCode="1" useLocalCopy="1"/>
   </MODULES>
   <EXPORTFORMATS>
     <XCODE_MAC targetFolder="Builds/MacOSX" juceFolder="../../JUCE/JUCE/modules">

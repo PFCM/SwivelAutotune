@@ -19,6 +19,7 @@ public:
     MainWindow() : DocumentWindow("Swivel", Colours::lightgrey, DocumentWindow::allButtons, true)
     {
         setContentOwned(new MainComponent(), true);
+        setResizable(true, true);
         setVisible(true);
     }
     ~MainWindow() {}

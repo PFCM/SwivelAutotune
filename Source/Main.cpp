@@ -9,7 +9,27 @@
 */
 
 #include "../JuceLibraryCode/JuceHeader.h"
+#include "MainComponent.h"
 
+// This class is our window
+class MainWindow : public DocumentWindow
+{
+public:
+    //============================================================================================
+    MainWindow() : DocumentWindow("Swivel", Colours::lightgrey, DocumentWindow::allButtons, true)
+    {
+        setContentOwned(new MainComponent(), true);
+        setVisible(true);
+    }
+    ~MainWindow() {}
+    
+    //=============================================================================================
+    void closeButtonPressed()
+    {
+        // user has pressed the close button, so we want to exit
+        JUCEApplication::quit();
+    }
+};
 
 //==============================================================================
 class SwivelAutotuneApplication  : public JUCEApplication
@@ -25,12 +45,14 @@ public:
     //==============================================================================
     void initialise (const String& commandLine)
     {
-        // Add your application's initialisation code here..
+        // actually make a window
+        mainWindow = new MainWindow();
     }
 
     void shutdown()
     {
-        // Add your application's shutdown code here..
+        // set scoped ptr to null destroys the object it points to
+        mainWindow = 0;
     }
 
     //==============================================================================
@@ -47,6 +69,10 @@ public:
         // this method is invoked, and the commandLine parameter tells you what
         // the other instance's command-line arguments were.
     }
+    
+private:
+    // a pointer to the window
+    ScopedPointer<MainWindow> mainWindow;
 };
 
 //==============================================================================

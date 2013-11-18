@@ -10,6 +10,7 @@
 #define __SwivelAutotune__MainComponent__
 
 #include "../JuceLibraryCode/JuceHeader.h"
+#include "String.h"
 
 class MainComponent : public Component
 {
@@ -25,6 +26,12 @@ private:
     //stuff
     ScopedPointer<AudioDeviceManager> deviceManager;
     ScopedPointer<AudioDeviceSelectorComponent> audioSelector; // this exists
+    // for now just one string
+    ScopedPointer<SwivelString> swivelString;
+    // data (this is shared between strings)
+    double* audio;
+    fftw_complex* spectra;
+    fftw_plan plan;
     //==========================================================
     JUCE_DECLARE_NON_COPYABLE_WITH_LEAK_DETECTOR (MainComponent)
 };

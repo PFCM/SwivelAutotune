@@ -214,6 +214,7 @@
 		32F543827BC8CA3ADB06DF20 /* juce_LowLevelGraphicsSoftwareRenderer.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; name = juce_LowLevelGraphicsSoftwareRenderer.h; path = ../../JuceLibraryCode/modules/juce_graphics/contexts/juce_LowLevelGraphicsSoftwareRenderer.h; sourceTree = SOURCE_ROOT; };
 		32FFA1441839B56700598F52 /* String.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; path = String.cpp; sourceTree = "<group>"; };
 		32FFA1451839B56700598F52 /* String.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = String.h; sourceTree = "<group>"; };
+		32FFA1481839C7DF00598F52 /* Windowing.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; name = Windowing.h; path = ../../Source/Windowing.h; sourceTree = "<group>"; };
 		331FD01BB7E3D247C478592A /* juce_AudioPluginFormatManager.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; name = juce_AudioPluginFormatManager.h; path = ../../JuceLibraryCode/modules/juce_audio_processors/format/juce_AudioPluginFormatManager.h; sourceTree = SOURCE_ROOT; };
 		33401D91CE1323C2706E98A7 /* juce_GraphicsContext.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; name = juce_GraphicsContext.h; path = ../../JuceLibraryCode/modules/juce_graphics/contexts/juce_GraphicsContext.h; sourceTree = SOURCE_ROOT; };
 		3362EB78E52399D2C9AE24BB /* juce_DropShadowEffect.cpp */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.cpp.cpp; name = juce_DropShadowEffect.cpp; path = ../../JuceLibraryCode/modules/juce_graphics/effects/juce_DropShadowEffect.cpp; sourceTree = SOURCE_ROOT; };
@@ -2371,6 +2372,7 @@
 				E322B5A2415D1B86C038AEA6 /* MainComponent.cpp */,
 				68AA62C88C4F2DFB537A7F2A /* MainComponent.h */,
 				32FFA1441839B56700598F52 /* String.cpp */,
+				32FFA1481839C7DF00598F52 /* Windowing.h */,
 				32FFA1451839B56700598F52 /* String.h */,
 				60CF87C6894023421FA1DAEC /* Main.cpp */,
 			);

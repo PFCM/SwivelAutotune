@@ -7,8 +7,7 @@
 //
 /**
     Represents a single string. Implements juce::AudioIODeviceCallback, so in order to do its calculations it must be
-    added as a callback to the current audio device. Also requires an fftw plan as a constructor argument in order to 
-    facilitate sharing plans between strings.
+    added as a callback to the current audio device.
 */
 
 #ifndef __SwivelAutotune__String__
@@ -21,7 +20,7 @@
 class SwivelString : public AudioIODeviceCallback
 {
 public:
-    SwivelString(fftw_plan fft_plan);
+    SwivelString(fftw_plan, double* input, fftw_complex* output, int fft_size);
     ~SwivelString();
     //===========================================
     void audioDeviceIOCallback(const float** inputChannelData,
@@ -34,6 +33,11 @@ public:
     
 private:
     fftw_plan fft_plan;
+    double* input;
+    fftw_complex* output;
+    int fft_size;
+    
+    double* input_buffer;
 };
 
 #endif /* defined(__SwivelAutotune__String__) */

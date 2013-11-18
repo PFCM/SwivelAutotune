@@ -11,15 +11,16 @@
 #include <Accelerate/Accelerate.h>
 
 //===========================================================
-SwivelString::SwivelString(fftw_plan plan, double* in, fftw_complex* out, int size) : fft_plan(plan),
-                                                                                      input(in),
-                                                                                      output(out),
-                                                                                      fft_size(size)
+SwivelString::SwivelString(fftw_plan plan, double* in, fftw_complex* out, int size, double sr) :
+    fft_plan(plan),input(in),output(out),fft_size(size),overlap(2),sample_rate(sr)
 {
     input_buffer = (double*) malloc(sizeof(double)*fft_size);
     magnitudes = (double*) malloc(sizeof(double)*fft_size/2);
     
     hop_size = fft_size/overlap;
+    
+    minBin = 0;
+    maxBin = fft_size/2;
 }
 
 SwivelString::~SwivelString()
@@ -47,7 +48,7 @@ void SwivelString::audioDeviceIOCallback(const float **inputChannelData,
     //          just copy it in
     // 2) the buffer has some remaining space < numSamples
     //          copy part of it in, process, copy the rest in to the front
-    if ((fft_size-1) - input_index >= numSamples)
+    if ((fft_size) - input_index >= numSamples)
     {
         for (int i =0; i < numSamples; i++)
         {
@@ -68,13 +69,12 @@ void SwivelString::audioDeviceIOCallback(const float **inputChannelData,
     }
     // do fft & process
     // copy into actual fft buffer and window
-    if (input_index == fft_size-1)
+    if (input_index == fft_size)
     {
         memcpy(input, input_buffer, fft_size*sizeof(double));
         Windowing::hann(input, fft_size);
+        peaks.clearQuick();
         fftw_execute(fft_plan);
-        int peaks[6];
-        int t=0;
         // find best peak (probably lowest)
         for (int i =minBin; i < maxBin; i++)
         {
@@ -85,7 +85,7 @@ void SwivelString::audioDeviceIOCallback(const float **inputChannelData,
             if (magnitudes[i] > magnitudes[i+1] &&
                 magnitudes[i] > magnitudes[i-1])
             {
-                peaks[t++] = i;
+                peaks.add(i);
             }
         }
         
@@ -121,7 +121,24 @@ void SwivelString::audioDeviceStopped()
 }
 
 //===============================================================================
+/** Returns the current peaks */
+Array<double>* SwivelString::getCurrentPeaksAsFrequencies()
+{
+    static Array<double>* peaksHz = new Array<double>();
+    peaksHz->clear();
+    double f = sample_rate/(double)fft_size; // fundamental of the series
+    for (int i =0; i < peaks.size(); i++)
+    {
+        peaksHz->add(f*peaks[i]);
+    }
+    
+    return peaksHz;
+}
+
+//===============================================================================
 double SwivelString::magnitude(fftw_complex in)
 {
     return sqrt(in[0]*in[0]+in[1]*in[1]);
 }
+
+

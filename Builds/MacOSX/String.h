@@ -20,7 +20,7 @@
 class SwivelString : public AudioIODeviceCallback
 {
 public:
-    SwivelString(fftw_plan, double* input, fftw_complex* output, int fft_size);
+    SwivelString(fftw_plan, double* input, fftw_complex* output, int fft_size, double sr);
     ~SwivelString();
     //===========================================
     void audioDeviceIOCallback(const float** inputChannelData,
@@ -31,17 +31,20 @@ public:
     void audioDeviceAboutToStart(AudioIODevice* device);
     void audioDeviceStopped();
     
+    //===========================================
+    Array<double>* getCurrentPeaksAsFrequencies();
 private:
     fftw_plan fft_plan;
     double* input;
     fftw_complex* output;
     int fft_size;
-    int overlap = 4;
+    int overlap;
     int hop_size;
     int minBin, maxBin;
     double* input_buffer;
     double* magnitudes;
-    
+    Array<int, CriticalSection> peaks;
+    double sample_rate;
     //=============================================
     double magnitude(fftw_complex);
 };

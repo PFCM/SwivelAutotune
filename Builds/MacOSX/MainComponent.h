@@ -58,10 +58,23 @@ private:
     double* audio;
     fftw_complex* spectra;
     fftw_plan plan;
-    
     //==========================================================
     /** Appends text to end of console */
-    void log(String text);
+    static void log(String text, TextEditor* console);
+    //==========================================================
+    /** Reports data at a given interval */
+    class Reporter : public Timer
+    {
+    public:
+        Reporter(SwivelString* producer, TextEditor* log);
+        void timerCallback();
+        void setString(SwivelString* str);
+        void setConsole(TextEditor* log);
+    private:
+        SwivelString* swString;
+        TextEditor* console;
+    };
+    ScopedPointer<Reporter> reporter;
     //==========================================================
     JUCE_DECLARE_NON_COPYABLE_WITH_LEAK_DETECTOR (MainComponent)
 };

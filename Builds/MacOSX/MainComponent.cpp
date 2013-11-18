@@ -56,6 +56,10 @@ MainComponent::MainComponent()
     console->setBounds(10, 240, 680, 50);
     addAndMakeVisible(console);
     
+    
+    //=========================================================================================
+    //misc
+    reporter = new Reporter(swivelString, console);
 }
 
 MainComponent::~MainComponent()
@@ -82,38 +86,79 @@ void MainComponent::comboBoxChanged(juce::ComboBox *box)
     if (fftSizeBox == box)
     {
         fft_size = FFTSizes[box->getSelectedItemIndex()];
-        log("FFT Size: " + String(fft_size) + "\n");
+        log("FFT Size: " + String(fft_size) + "\n", console);
     }
 }
 
 void MainComponent::buttonClicked(juce::Button *button)
 {
+    static bool running = false;
     if (goButton == button)
     {
-        log("-----------------------------------------------------\n");
-        log("                     BEGINNING                       \n");
-        // BEGIN
-        // allocate space for audio
-        log("Allocating shared buffers\n");
-        audio = (double*) fftw_malloc(sizeof(double)*fft_size);
-        log("\t"+String((uint64)sizeof(double)*fft_size) + " bytes allocated for audio\n");
-        spectra = (fftw_complex*) fftw_malloc(sizeof(fftw_complex)*fft_size);
-        log("\t"+String((uint64)sizeof(fftw_complex)*fft_size) + " bytes allocated for FFT result\n");
-        // determine plan for FFT
-        log("Calculating FFT plan\n");
-        plan = fftw_plan_dft_r2c_1d(fft_size, audio, spectra, FFTW_MEASURE);
-        log("Done\n");
-        //initialise string objects
-        log("Initialising strings\n");
-        swivelString = new SwivelString(plan, audio, spectra, fft_size);
-        
-        // actually start process (will require midi)
+        if (running == false)
+        {
+            log("-----------------------------------------------------\n", console);
+            log("                     BEGINNING                       \n", console);
+            // BEGIN
+            // allocate space for audio
+            log("Allocating shared buffers\n", console);
+            audio = (double*) fftw_malloc(sizeof(double)*fft_size);
+            log("\t"+String((uint64)sizeof(double)*fft_size) + " bytes allocated for audio\n", console);
+            spectra = (fftw_complex*) fftw_malloc(sizeof(fftw_complex)*fft_size);
+            log("\t"+String((uint64)sizeof(fftw_complex)*fft_size) + " bytes allocated for FFT result\n", console);
+            // determine plan for FFT
+            log("Calculating FFT plan\n", console);
+            plan = fftw_plan_dft_r2c_1d(fft_size, audio, spectra, FFTW_MEASURE);
+            log("Done\n", console);
+            //initialise string objects
+            log("Initialising strings\n", console);
+            swivelString = new SwivelString(plan, audio, spectra, fft_size, deviceManager->getCurrentAudioDevice()->getCurrentSampleRate());
+            // actually start process (will require midi)
+            deviceManager->addAudioCallback(swivelString);
+            
+            running = true;
+            goButton->setButtonText("STOP");
+            reporter->setString(swivelString);
+            reporter->setConsole(console);
+            reporter->startTimer(100);
+        }
+        else // running must == true
+        {
+            log("-----------------------------------------------------\n", console);
+            log("----------------------STOPPING-----------------------\n", console);
+            log("-----------------------------------------------------\n", console);
+            reporter->stopTimer();
+            deviceManager->removeAudioCallback(swivelString);
+            running = false;
+            goButton->setButtonText("GO");
+        }
     }
 }
 
 //===============================================================================================
-void MainComponent::log(juce::String text)
+void MainComponent::log(juce::String text, TextEditor* console)
 {
     console->setCaretPosition(console->getText().length());
-    console->insertTextAtCaret(text);
+   console->insertTextAtCaret(text);
+}
+
+MainComponent::Reporter::Reporter(SwivelString* r, TextEditor* log) : swString(r), console(log)
+{
+    
+}
+
+void MainComponent::Reporter::setConsole(juce::TextEditor *log)
+{
+    console = log;
+}
+
+void MainComponent::Reporter::setString(SwivelString *str)
+{
+    swString = str;
+}
+
+void MainComponent::Reporter::timerCallback()
+{
+    Array<double>* peaksPtr = swString->getCurrentPeaksAsFrequencies();
+    log("lowest: " + String((*peaksPtr)[0]) + "\n", console);
 }

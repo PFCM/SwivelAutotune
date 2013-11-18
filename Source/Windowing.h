@@ -21,8 +21,8 @@ public:
         static int lastSize = 0;
         if (lastSize != size)
         {
-            if (window != nullptr) free(window);
-            window = (double*) malloc(size*sizeof(double));
+            if (window != nullptr) delete[] window;
+            window = new double[size];
             /*for (int i = 0; i < size; i++)
             {
                 window[i] = 0.5 * (1.0-cos((TWOPI*i)/size-1));

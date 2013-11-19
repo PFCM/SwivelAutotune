@@ -9,6 +9,7 @@
 #include "String.h"
 #include "Windowing.h"
 #include <Accelerate/Accelerate.h>
+#include "MainComponent.h"
 
 //===========================================================
 SwivelString::SwivelString(fftw_plan plan, double* in, fftw_complex* out, int size, double sr, int ol) :
@@ -77,7 +78,7 @@ void SwivelString::audioDeviceIOCallback(const float **inputChannelData,
     {
         // could possibly do with a filter
         memcpy(input, input_buffer, fft_size*sizeof(double));
-        Windowing::hann(input, fft_size);
+        window(input, fft_size);
         peaks.clearQuick();
         fftw_execute(fft_plan);
         // find best peak (probably lowest)
@@ -148,6 +149,28 @@ Array<double>* SwivelString::getCurrentPeaksAsFrequencies()
 double SwivelString::magnitude(fftw_complex in)
 {
     return sqrt(in[0]*in[0]+in[1]*in[1]);
+}
+
+void SwivelString::window(double *input, int size)
+{
+    switch (windowType)
+    {
+        case MainComponent::WindowType::HANN:
+            Windowing::hann(input, size);
+            break;
+            
+        case MainComponent::WindowType::HAMMING:
+            Windowing::hamming(input, size);
+            break;
+            
+        case MainComponent::WindowType::BLACKMAN:
+            Windowing::blkman(input, size);
+            break;
+            
+        case MainComponent::WindowType::RECTANGULAR: // rectangular is no windowing
+        default: // default is no windowing
+            break;
+    }
 }
 
 

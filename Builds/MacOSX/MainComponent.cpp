@@ -59,6 +59,21 @@ MainComponent::MainComponent()
     overlapBox->addListener(this);
     addAndMakeVisible(overlapBox);
     
+    // windowing
+    windowLabel = new Label("Windowing", "Windowing");
+    windowLabel->setBounds(310, 105, 100, 20);
+    addAndMakeVisible(windowLabel);
+    windowBox = new ComboBox("Window Box");
+    windowBox->addItem("Hann", WindowType::HANN);
+    windowBox->addItem("Hamming", WindowType::HAMMING);
+    windowBox->addItem("Blackman", WindowType::BLACKMAN);
+    windowBox->addItem("Rectangle", WindowType::RECTANGULAR);
+    windowBox->setSelectedId(WindowType::HANN);
+    windowBox->setBounds(310, 130, 100, 20);
+    windowBox->setSelectedId(WindowType::HANN);
+    windowBox->addListener(this);
+    addAndMakeVisible(windowBox);
+    
     //=========================================================================================
     // go button
     goButton = new TextButton("GO");
@@ -110,6 +125,30 @@ void MainComponent::comboBoxChanged(juce::ComboBox *box)
     {
         overlap = overlapOptions[box->getSelectedItemIndex()];
         log("Overlap: "+ String(overlap) + "\n", console);
+    }
+    else if (windowBox == box)
+    {
+        window = (WindowType)windowBox->getSelectedId();
+        String message = "Window: ";
+        
+        switch (window) {
+            case HANN:
+                message += "Hann.\n";
+                break;
+            case BLACKMAN:
+                message += "Blackman.\n";
+                break;
+            case HAMMING:
+                message += "Hamming.\n";
+                break;
+            case RECTANGULAR:
+                message += "Rectangle.\n";
+                break;
+                
+            default:
+                message += "Unknown. Be worried.\n";
+                break;
+        }
     }
 }
 

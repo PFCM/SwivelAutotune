@@ -27,6 +27,15 @@ public:
     void comboBoxChanged(ComboBox* box);
     void buttonClicked(Button* button);
     
+    
+    enum WindowType {
+        placeholder,
+        HANN,
+        HAMMING,
+        BLACKMAN,
+        RECTANGULAR
+    };
+    
 private:
     //GUI stuff
     ScopedPointer<AudioDeviceManager> deviceManager;
@@ -53,10 +62,14 @@ private:
     const int NUM_OVERLAPS = 4;
     int overlap = 2;
     
+    // window
+    ScopedPointer<Label> windowLabel;
+    ScopedPointer<ComboBox> windowBox;
+    WindowType window;
+    
     ScopedPointer<TextButton> goButton;
     
     // bit of output
-    ScopedPointer<ConcertinaPanel> consolePanel;
     ScopedPointer<TextEditor> console;
     
     // for now just one string

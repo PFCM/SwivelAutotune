@@ -17,6 +17,7 @@
 #include "../JuceLibraryCode/JuceHeader.h"
 #include <fftw3.h>
 
+
 class SwivelString : public AudioIODeviceCallback
 {
 public:
@@ -45,8 +46,11 @@ private:
     double* magnitudes;
     Array<int, CriticalSection> peaks;
     double sample_rate;
+    int windowType;
     //=============================================
     double magnitude(fftw_complex);
+    void window(double* input, int size);
+    
 };
 
 #endif /* defined(__SwivelAutotune__String__) */

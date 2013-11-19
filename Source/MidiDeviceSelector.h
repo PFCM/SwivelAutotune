@@ -30,4 +30,28 @@ private:
     ScopedPointer<MidiOutput> outputDevice;
 };
 
+/** A ComboBox that populates isself with available MIDI input devices */
+class MidiInputDeviceSelector : public ComboBox,
+                                private ComboBox::Listener, MidiInputCallback
+{
+public:
+    MidiInputDeviceSelector(String name);
+    
+    /** Returns a reference to the selected MidiInput.
+        Probably should not use this directly, it would be safer to register
+        a callback with this object.
+    */
+    MidiInput* getSeletedInput();
+    
+    void comboBoxChanged(ComboBox* changed);
+    void handleIncomingMidiMessage(MidiInput* source, const MidiMessage &message);
+    void addMidiInputCallback(MidiInputCallback* newCallback);
+    void removeMidiInputCallback(MidiInputCallback* oldCallback);
+    
+private:
+    // current device
+    ScopedPointer<MidiInput> inputDevice;
+    Array<MidiInputCallback*> callbacks;
+};
+
 #endif /* defined(__SwivelAutotune__MidiDeviceSelector__) */

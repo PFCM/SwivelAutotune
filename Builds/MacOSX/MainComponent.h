@@ -74,10 +74,14 @@ private:
     ScopedPointer<MidiOutputDeviceSelector> midiOutBox;
     ScopedPointer<Label> midiOutLabel;
     
+    ScopedPointer<MidiInputDeviceSelector> midiInBox;
+    ScopedPointer<Label> midiInLabel;
+    
     // bit of output
     ScopedPointer<TextEditor> console;
     
     // for now just one string
+    OwnedArray<XmlElement> stringData;
     ScopedPointer<SwivelString> swivelString;
     
     // at the moment, let's have a button to choose a data file for this string

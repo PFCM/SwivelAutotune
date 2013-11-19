@@ -33,3 +33,37 @@ MidiOutput* MidiOutputDeviceSelector::getSelectedOutput()
 {
     return outputDevice.get();
 }
+
+//=============MidiInputDeviceSelector============================================
+MidiInputDeviceSelector::MidiInputDeviceSelector(String name) : ComboBox(name)
+{
+    // get list of devices
+    StringArray devices = MidiInput::getDevices();
+    addItemList(devices, 1);
+    addListener(this);
+    setSelectedItemIndex(MidiInput::getDefaultDeviceIndex());
+}
+
+void MidiInputDeviceSelector::comboBoxChanged(juce::ComboBox *changed)
+{
+    if (inputDevice != nullptr)
+        delete inputDevice;
+    
+    inputDevice = MidiInput::openDevice(changed->getSelectedItemIndex(), this);
+}
+
+void MidiInputDeviceSelector::handleIncomingMidiMessage(juce::MidiInput *source, const juce::MidiMessage &message)
+{
+    for (int i = 0; i < callbacks.size(); i++)
+        callbacks[i]->handleIncomingMidiMessage(source, message);
+}
+
+void MidiInputDeviceSelector::addMidiInputCallback(MidiInputCallback* callback)
+{
+    callbacks.addIfNotAlreadyThere(callback);
+}
+
+void MidiInputDeviceSelector::removeMidiInputCallback(juce::MidiInputCallback *oldCallback)
+{
+    callbacks.removeFirstMatchingValue(oldCallback);
+}

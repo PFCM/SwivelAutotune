@@ -54,14 +54,14 @@ MainComponent::MainComponent()
     {
         overlapBox->addItem(String(overlapOptions[i]), i+1);
     }
-    overlapBox->setBounds(310, 80, 100, 20);
+    overlapBox->setBounds(310, 75, 100, 20);
     overlapBox->setSelectedId(2);
     overlapBox->addListener(this);
     addAndMakeVisible(overlapBox);
     
     // windowing
     windowLabel = new Label("Windowing", "Windowing");
-    windowLabel->setBounds(310, 105, 100, 20);
+    windowLabel->setBounds(310, 100, 100, 20);
     addAndMakeVisible(windowLabel);
     windowBox = new ComboBox("Window Box");
     windowBox->addItem("Hann", WindowType::HANN);
@@ -69,7 +69,7 @@ MainComponent::MainComponent()
     windowBox->addItem("Blackman", WindowType::BLACKMAN);
     windowBox->addItem("Rectangle", WindowType::RECTANGULAR);
     windowBox->setSelectedId(WindowType::HANN);
-    windowBox->setBounds(310, 130, 100, 20);
+    windowBox->setBounds(310, 120, 100, 20);
     windowBox->setSelectedId(WindowType::HANN);
     windowBox->addListener(this);
     addAndMakeVisible(windowBox);
@@ -77,12 +77,21 @@ MainComponent::MainComponent()
     
     //========================================================================================
     // midi out
-    midiOutBox = new MidiOutputDeviceSelector(String("Midi Out Box"));
-    midiOutBox->setBounds(420, 50, 100, 20);
+    midiOutBox = new MidiOutputDeviceSelector("Midi Out Box");
+    midiOutBox->setBounds(420, 30, 100, 20);
     addAndMakeVisible(midiOutBox);
     midiOutLabel = new Label("Midi out label", "MIDI Out: ");
-    midiOutLabel->setBounds(420, 25, 100, 20);
+    midiOutLabel->setBounds(420, 10, 100, 20);
     addAndMakeVisible(midiOutLabel);
+    
+    //midi in
+    midiInLabel = new Label("Midi in label", "MIDI In: ");
+    midiInLabel->setBounds(420, 55, 100, 20);
+    midiInBox = new MidiInputDeviceSelector("Midi In Box");
+    midiInBox->setBounds(420, 75, 100, 20);
+    
+    addAndMakeVisible(midiInLabel);
+    addAndMakeVisible(midiInBox);
     
     //=========================================================================================
     // file chooser button
@@ -111,6 +120,8 @@ MainComponent::MainComponent()
     //=========================================================================================
     //misc
     reporter = new Reporter(swivelString, console);
+    for (int i = 0; i < 6; i++)
+        stringData.add(new XmlElement("null"));
 }
 
 MainComponent::~MainComponent()
@@ -195,11 +206,15 @@ void MainComponent::buttonClicked(juce::Button *button)
         if (chooser.browseForFileToOpen())
         {
             File chosen (chooser.getResult());
-            XmlDocument xmlDoc(chosen);
-            ScopedPointer<XmlElement> stringElement = xmlDoc.getDocumentElement();
+            XmlElement* stringElement = XmlDocument::parse(chosen);
             if (stringElement == nullptr)
             {
-                std::cerr << xmlDoc.getLastParseError();
+                std::cerr << "Some error";//xmlDoc.getLastParseError();
+            }
+            else
+            {
+                int index = stringElement->getIntAttribute("number");
+                stringData.set(index, stringElement);
             }
         }
     }
@@ -285,6 +300,7 @@ void MainComponent::Reporter::setString(SwivelString *str)
 
 void MainComponent::Reporter::timerCallback()
 {
+    int peak_index = 1;
     Array<double>* peaksPtr = swString->getCurrentPeaksAsFrequencies();
-    log("lowest: " + String((*peaksPtr)[0]) + "\n", console);
+    log("lowest: " + String((*peaksPtr)[peak_index]) + "\n", console);
 }

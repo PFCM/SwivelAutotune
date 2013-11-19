@@ -79,6 +79,9 @@ private:
     
     // for now just one string
     ScopedPointer<SwivelString> swivelString;
+    
+    // at the moment, let's have a button to choose a data file for this string
+    ScopedPointer<TextButton> chooseFileButton;
     // data (this is shared between strings)
     double* audio;
     fftw_complex* spectra;
@@ -100,7 +103,16 @@ private:
         TextEditor* console;
     };
     ScopedPointer<Reporter> reporter;
+    
     //==========================================================
+    //////////////////////////////////////////////////////////////////////
+    //////////////////////////////////////////////////////////////////////
+    void begin();/////////////////////////////////////////////////////////
+    void end();  /////////////////////////////////////////////////////////
+    //////////////////////////////////////////////////////////////////////
+    //////////////////////////////////////////////////////////////////////
+    //==========================================================
+    
     JUCE_DECLARE_NON_COPYABLE_WITH_LEAK_DETECTOR (MainComponent)
 };
 

@@ -84,6 +84,13 @@ MainComponent::MainComponent()
     midiOutLabel->setBounds(420, 25, 100, 20);
     addAndMakeVisible(midiOutLabel);
     
+    //=========================================================================================
+    // file chooser button
+    chooseFileButton = new TextButton("Choose Data File");
+    chooseFileButton->setBounds(getWidth()-100, 10, 80, 20);
+    chooseFileButton->addListener(this);
+    addAndMakeVisible(chooseFileButton);
+    
     
     //=========================================================================================
     // go button
@@ -170,56 +177,89 @@ void MainComponent::buttonClicked(juce::Button *button)
     {
         if (running == false)
         {
-            log("-----------------------------------------------------\n", console);
-            log("---------------------BEGINNING-----------------------\n", console);
-            // BEGIN
-            // allocate space for audio
-            log("Allocating shared buffers\n", console);
-            audio = (double*) fftw_malloc(sizeof(double)*fft_size);
-            log("\t"+String((uint64)sizeof(double)*fft_size) + " bytes allocated for audio\n", console);
-            spectra = (fftw_complex*) fftw_malloc(sizeof(fftw_complex)*fft_size);
-            log("\t"+String((uint64)sizeof(fftw_complex)*fft_size) + " bytes allocated for FFT result\n", console);
-            // determine plan for FFT
-            log("Calculating FFT plan\n", console);
-            plan = fftw_plan_dft_r2c_1d(fft_size, audio, spectra, FFTW_MEASURE);
-            log("Done\n", console);
-            //initialise string objects
-            log("Initialising strings\n", console);
-            swivelString = new SwivelString(plan, audio, spectra, fft_size, deviceManager->getCurrentAudioDevice()->getCurrentSampleRate(), overlap);
-            // actually start process (will require midi)
-            deviceManager->addAudioCallback(swivelString);
-            
+            begin();
             running = true;
-            goButton->setButtonText("STOP");
-            reporter->setString(swivelString);
-            reporter->setConsole(console);
-            reporter->startTimer(700);
-            
-            // try out some MIDI
-            double sr = deviceManager->getCurrentAudioDevice()->getCurrentSampleRate();
-            MidiBuffer messages;
-            for (int i =0; i < 10; i++)
-            {
-                messages.addEvent(MidiMessage(146,i,i), i*(int)sr);
-            }
-            MidiOutput* midi = midiOutBox->getSelectedOutput();
-            midi->startBackgroundThread();
-            midi->sendBlockOfMessages(messages, Time::getMillisecondCounter()+1000, sr);
         }
         else // running must == true
         {
-            log("-----------------------------------------------------\n", console);
-            log("----------------------STOPPING-----------------------\n", console);
-            log("-----------------------------------------------------\n", console);
-            reporter->stopTimer();
-            deviceManager->removeAudioCallback(swivelString);
+            end();
             running = false;
-            goButton->setButtonText("GO");
-            MidiOutput* midi = midiOutBox->getSelectedOutput();
-            midi->stopBackgroundThread();
+        }
+    }
+    else if (chooseFileButton == button)
+    {
+        FileChooser chooser("Choose XML data file", // title
+                            File::getSpecialLocation(File::userHomeDirectory), // directory
+                            "*.xml"); // pattern (also bool to use native dialog, default true)
+        
+        if (chooser.browseForFileToOpen())
+        {
+            File chosen (chooser.getResult());
+            XmlDocument xmlDoc(chosen);
+            ScopedPointer<XmlElement> stringElement = xmlDoc.getDocumentElement();
+            if (stringElement == nullptr)
+            {
+                std::cerr << xmlDoc.getLastParseError();
+            }
         }
     }
 }
+
+//===============================================================================================
+// the all important
+
+void MainComponent::begin()
+{
+    
+    log("-----------------------------------------------------\n", console);
+    log("---------------------BEGINNING-----------------------\n", console);
+    log("-----------------------------------------------------\n", console);
+    // BEGIN
+    // allocate space for audio
+    log("Allocating shared buffers\n", console);
+    audio = (double*) fftw_malloc(sizeof(double)*fft_size);
+    log("\t"+String((uint64)sizeof(double)*fft_size) + " bytes allocated for audio\n", console);
+    spectra = (fftw_complex*) fftw_malloc(sizeof(fftw_complex)*fft_size);
+    log("\t"+String((uint64)sizeof(fftw_complex)*fft_size) + " bytes allocated for FFT result\n", console);
+    // determine plan for FFT
+    log("Calculating FFT plan\n", console);
+    plan = fftw_plan_dft_r2c_1d(fft_size, audio, spectra, FFTW_MEASURE);
+    log("Done\n", console);
+    //initialise string objects
+    log("Initialising strings\n", console);
+    swivelString = new SwivelString(plan, audio, spectra, fft_size, deviceManager->getCurrentAudioDevice()->getCurrentSampleRate(), overlap);
+    // actually start process (will require midi)
+    deviceManager->addAudioCallback(swivelString);
+    
+    goButton->setButtonText("STOP");
+    reporter->setString(swivelString);
+    reporter->setConsole(console);
+    reporter->startTimer(700);
+    
+    // try out some MIDI
+    double sr = deviceManager->getCurrentAudioDevice()->getCurrentSampleRate();
+    MidiBuffer messages;
+    for (int i =0; i < 10; i++)
+    {
+        messages.addEvent(MidiMessage(146,i,i), i*(int)sr);
+    }
+    MidiOutput* midi = midiOutBox->getSelectedOutput();
+    midi->startBackgroundThread();
+    midi->sendBlockOfMessages(messages, Time::getMillisecondCounter()+1000, sr);
+}
+
+void MainComponent::end()
+{
+    log("-----------------------------------------------------\n", console);
+    log("----------------------STOPPING-----------------------\n", console);
+    log("-----------------------------------------------------\n", console);
+    reporter->stopTimer();
+    deviceManager->removeAudioCallback(swivelString);
+    goButton->setButtonText("GO");
+    MidiOutput* midi = midiOutBox->getSelectedOutput();
+    midi->stopBackgroundThread();
+}
+
 
 //===============================================================================================
 void MainComponent::log(juce::String text, TextEditor* console)

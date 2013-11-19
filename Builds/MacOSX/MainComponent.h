@@ -15,7 +15,8 @@
 
 class MainComponent : public    Component,
                       private   ComboBox::Listener,
-                                Button::Listener
+                                Button::Listener,
+                                MidiInputCallback
 {
 public:
     MainComponent();
@@ -28,6 +29,7 @@ public:
     void comboBoxChanged(ComboBox* box);
     void buttonClicked(Button* button);
     
+    void handleIncomingMidiMessage(MidiInput* input, const MidiMessage& msg);
     
     enum WindowType {
         placeholder,

@@ -23,7 +23,7 @@ void MidiOutputDeviceSelector::comboBoxChanged(juce::ComboBox *changed)
 {
     if (outputDevice!=nullptr)
     {
-        delete outputDevice;
+        outputDevice=nullptr;
     }
     
     outputDevice = MidiOutput::openDevice(changed->getSelectedItemIndex());
@@ -46,10 +46,15 @@ MidiInputDeviceSelector::MidiInputDeviceSelector(String name) : ComboBox(name)
 
 void MidiInputDeviceSelector::comboBoxChanged(juce::ComboBox *changed)
 {
+    // make sure it is stopped
     if (inputDevice != nullptr)
-        delete inputDevice;
+    {
+        inputDevice->stop();
+        inputDevice = nullptr;
+    }
     
     inputDevice = MidiInput::openDevice(changed->getSelectedItemIndex(), this);
+    inputDevice->start();
 }
 
 void MidiInputDeviceSelector::handleIncomingMidiMessage(juce::MidiInput *source, const juce::MidiMessage &message)

@@ -89,7 +89,7 @@ MainComponent::MainComponent()
     midiInLabel->setBounds(420, 55, 100, 20);
     midiInBox = new MidiInputDeviceSelector("Midi In Box");
     midiInBox->setBounds(420, 75, 100, 20);
-    
+    midiInBox->addMidiInputCallback(this);
     addAndMakeVisible(midiInLabel);
     addAndMakeVisible(midiInBox);
     
@@ -252,6 +252,7 @@ void MainComponent::begin()
     reporter->startTimer(700);
     
     // try out some MIDI
+    
     double sr = deviceManager->getCurrentAudioDevice()->getCurrentSampleRate();
     MidiBuffer messages;
     for (int i =0; i < 10; i++)
@@ -273,6 +274,15 @@ void MainComponent::end()
     goButton->setButtonText("GO");
     MidiOutput* midi = midiOutBox->getSelectedOutput();
     midi->stopBackgroundThread();
+}
+
+//===============================================================================================
+void MainComponent::handleIncomingMidiMessage(juce::MidiInput *source, const juce::MidiMessage &message)
+{
+    // if we want to print the data to the console, we are going to have to lock the message thread
+    const MessageManagerLock mmLock; // should do it
+    const uint8* data = message.getRawData();
+    log("Received MIDI: " + String(data[0]) + " " + String(data[1]) + " " + String(data[2]) + "\n", console);
 }
 
 

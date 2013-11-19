@@ -145,5 +145,51 @@
             landmarkType = "5">
          </BreakpointContent>
       </BreakpointProxy>
+      <BreakpointProxy
+         BreakpointExtensionID = "Xcode.Breakpoint.FileBreakpoint">
+         <BreakpointContent
+            shouldBeEnabled = "No"
+            ignoreCount = "0"
+            continueAfterRunningActions = "No"
+            filePath = "../../Source/MidiDeviceSelector.cpp"
+            timestampString = "406596992.387084"
+            startingColumnNumber = "9223372036854775807"
+            endingColumnNumber = "9223372036854775807"
+            startingLineNumber = "62"
+            endingLineNumber = "62"
+            landmarkName = "MidiInputDeviceSelector::handleIncomingMidiMessage(juce::MidiInput *source, const juce::MidiMessage &amp;message)"
+            landmarkType = "5">
+            <Locations>
+               <Location
+                  shouldBeEnabled = "No"
+                  ignoreCount = "0"
+                  continueAfterRunningActions = "No"
+                  symbolName = "MidiInputDeviceSelector::handleIncomingMidiMessage(juce::MidiInput*, juce::MidiMessage const&amp;)"
+                  moduleName = "SwivelAutotune"
+                  urlString = "file:///Users/pfcmathews/Documents/SwivelAutotune/Source/MidiDeviceSelector.cpp"
+                  timestampString = "406596668.784131"
+                  startingColumnNumber = "9223372036854775807"
+                  endingColumnNumber = "9223372036854775807"
+                  startingLineNumber = "62"
+                  endingLineNumber = "62"
+                  offsetFromSymbolStart = "28">
+               </Location>
+               <Location
+                  shouldBeEnabled = "No"
+                  ignoreCount = "0"
+                  continueAfterRunningActions = "No"
+                  symbolName = "MidiInputDeviceSelector::handleIncomingMidiMessage(juce::MidiInput*, juce::MidiMessage const&amp;)"
+                  moduleName = "SwivelAutotune"
+                  urlString = "file:///Users/pfcmathews/Documents/SwivelAutotune/Source/MidiDeviceSelector.cpp"
+                  timestampString = "406596668.784349"
+                  startingColumnNumber = "9223372036854775807"
+                  endingColumnNumber = "9223372036854775807"
+                  startingLineNumber = "62"
+                  endingLineNumber = "62"
+                  offsetFromSymbolStart = "119">
+               </Location>
+            </Locations>
+         </BreakpointContent>
+      </BreakpointProxy>
    </Breakpoints>
 </Bucket>

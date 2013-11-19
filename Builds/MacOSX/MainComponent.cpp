@@ -74,6 +74,17 @@ MainComponent::MainComponent()
     windowBox->addListener(this);
     addAndMakeVisible(windowBox);
     
+    
+    //========================================================================================
+    // midi out
+    midiOutBox = new MidiOutputDeviceSelector(String("Midi Out Box"));
+    midiOutBox->setBounds(420, 50, 100, 20);
+    addAndMakeVisible(midiOutBox);
+    midiOutLabel = new Label("Midi out label", "MIDI Out: ");
+    midiOutLabel->setBounds(420, 25, 100, 20);
+    addAndMakeVisible(midiOutLabel);
+    
+    
     //=========================================================================================
     // go button
     goButton = new TextButton("GO");
@@ -183,6 +194,11 @@ void MainComponent::buttonClicked(juce::Button *button)
             reporter->setString(swivelString);
             reporter->setConsole(console);
             reporter->startTimer(700);
+            
+            // try out some MIDI
+            
+            MidiOutput* midi = midiOutBox->getSelectedOutput();
+            midi->sendMessageNow(MidiMessage(146, 66, 66));
         }
         else // running must == true
         {

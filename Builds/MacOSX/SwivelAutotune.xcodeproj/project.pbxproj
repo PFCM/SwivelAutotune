@@ -12,6 +12,7 @@
 		19CBE06295409C80F8EE5ED3 /* CoreMIDI.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = 7196D681B66B44E70D43FEE9 /* CoreMIDI.framework */; };
 		21B6438A0252A0AF0C375C99 /* Carbon.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = 41D6C712F06C47C54753C2C5 /* Carbon.framework */; };
 		2B0FF0FCB8F7A318C4ABCD42 /* juce_audio_processors.mm in Sources */ = {isa = PBXBuildFile; fileRef = 719FB52ED246920763A39CC5 /* juce_audio_processors.mm */; };
+		32A6AA53183B037C005CD3D8 /* MidiDeviceSelector.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 32A6AA51183B037C005CD3D8 /* MidiDeviceSelector.cpp */; };
 		32FFA1461839B56700598F52 /* String.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 32FFA1441839B56700598F52 /* String.cpp */; };
 		32FFA14B1839D26700598F52 /* libfftw3.3.dylib in Frameworks */ = {isa = PBXBuildFile; fileRef = 32FFA14A1839D26700598F52 /* libfftw3.3.dylib */; };
 		38FD7DA8D6B179989105CD62 /* juce_video.mm in Sources */ = {isa = PBXBuildFile; fileRef = F4AA7121685DE6A06FB9DE63 /* juce_video.mm */; };
@@ -211,6 +212,8 @@
 		3184CB50353EBA08E84F2D47 /* juce_ValueTree.cpp */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.cpp.cpp; name = juce_ValueTree.cpp; path = ../../JuceLibraryCode/modules/juce_data_structures/values/juce_ValueTree.cpp; sourceTree = SOURCE_ROOT; };
 		31DEC60FAE7458F1BDC046F5 /* juce_AudioCDReader.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; name = juce_AudioCDReader.h; path = ../../JuceLibraryCode/modules/juce_audio_devices/audio_cd/juce_AudioCDReader.h; sourceTree = SOURCE_ROOT; };
 		32A5A0E03312DFA618B22165 /* juce_FilenameComponent.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; name = juce_FilenameComponent.h; path = ../../JuceLibraryCode/modules/juce_gui_basics/filebrowser/juce_FilenameComponent.h; sourceTree = SOURCE_ROOT; };
+		32A6AA51183B037C005CD3D8 /* MidiDeviceSelector.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; name = MidiDeviceSelector.cpp; path = ../../Source/MidiDeviceSelector.cpp; sourceTree = "<group>"; };
+		32A6AA52183B037C005CD3D8 /* MidiDeviceSelector.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; name = MidiDeviceSelector.h; path = ../../Source/MidiDeviceSelector.h; sourceTree = "<group>"; };
 		32CD67CE11347480869AF063 /* juce_OptionalScopedPointer.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; name = juce_OptionalScopedPointer.h; path = ../../JuceLibraryCode/modules/juce_core/memory/juce_OptionalScopedPointer.h; sourceTree = SOURCE_ROOT; };
 		32F543827BC8CA3ADB06DF20 /* juce_LowLevelGraphicsSoftwareRenderer.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; name = juce_LowLevelGraphicsSoftwareRenderer.h; path = ../../JuceLibraryCode/modules/juce_graphics/contexts/juce_LowLevelGraphicsSoftwareRenderer.h; sourceTree = SOURCE_ROOT; };
 		32FFA1441839B56700598F52 /* String.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; path = String.cpp; sourceTree = "<group>"; };
@@ -2378,6 +2381,8 @@
 				32FFA1441839B56700598F52 /* String.cpp */,
 				32FFA1451839B56700598F52 /* String.h */,
 				32FFA1481839C7DF00598F52 /* Windowing.h */,
+				32A6AA51183B037C005CD3D8 /* MidiDeviceSelector.cpp */,
+				32A6AA52183B037C005CD3D8 /* MidiDeviceSelector.h */,
 				60CF87C6894023421FA1DAEC /* Main.cpp */,
 			);
 			name = Source;
@@ -2707,6 +2712,7 @@
 				E56CA76859E2E0117ABA0188 /* juce_data_structures.mm in Sources */,
 				A542CA6D28A31BAF451C150A /* juce_events.mm in Sources */,
 				7E928B2BD5E1579B9E0FD921 /* juce_graphics.mm in Sources */,
+				32A6AA53183B037C005CD3D8 /* MidiDeviceSelector.cpp in Sources */,
 				9422665E2681446CCD09E123 /* juce_gui_basics.mm in Sources */,
 				3BF082B56A9BB431C1644197 /* juce_gui_extra.mm in Sources */,
 				72B03CDEBDCF8E56EB2B1AD9 /* juce_opengl.mm in Sources */,

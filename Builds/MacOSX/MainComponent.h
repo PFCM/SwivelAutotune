@@ -11,6 +11,7 @@
 
 #include "../JuceLibraryCode/JuceHeader.h"
 #include "String.h"
+#include "MidiDeviceSelector.h"
 
 class MainComponent : public    Component,
                       private   ComboBox::Listener,
@@ -68,6 +69,10 @@ private:
     WindowType window;
     
     ScopedPointer<TextButton> goButton;
+    
+    // MIDI
+    ScopedPointer<MidiOutputDeviceSelector> midiOutBox;
+    ScopedPointer<Label> midiOutLabel;
     
     // bit of output
     ScopedPointer<TextEditor> console;

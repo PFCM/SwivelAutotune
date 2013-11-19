@@ -196,9 +196,15 @@ void MainComponent::buttonClicked(juce::Button *button)
             reporter->startTimer(700);
             
             // try out some MIDI
-            
+            double sr = deviceManager->getCurrentAudioDevice()->getCurrentSampleRate();
+            MidiBuffer messages;
+            for (int i =0; i < 10; i++)
+            {
+                messages.addEvent(MidiMessage(146,i,i), i*(int)sr);
+            }
             MidiOutput* midi = midiOutBox->getSelectedOutput();
-            midi->sendMessageNow(MidiMessage(146, 66, 66));
+            midi->startBackgroundThread();
+            midi->sendBlockOfMessages(messages, Time::getMillisecondCounter()+1000, sr);
         }
         else // running must == true
         {
@@ -209,6 +215,8 @@ void MainComponent::buttonClicked(juce::Button *button)
             deviceManager->removeAudioCallback(swivelString);
             running = false;
             goButton->setButtonText("GO");
+            MidiOutput* midi = midiOutBox->getSelectedOutput();
+            midi->stopBackgroundThread();
         }
     }
 }

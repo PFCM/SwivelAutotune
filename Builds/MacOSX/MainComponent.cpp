@@ -41,6 +41,24 @@ MainComponent::MainComponent()
     fftSizeBox->addListener(this);
     addAndMakeVisible(fftSizeBox);
     
+    //overlap
+    overlapLabel = new Label("Overlap Label", "Overlap");
+    overlapLabel->setEditable(false);
+    overlapLabel->setBounds(310, 55, 100, 20);
+    addAndMakeVisible(overlapLabel);
+    overlapBox = new ComboBox("Overlap Amount");
+    overlapBox->setTooltip(String("The amount of overlap between successive FFT frames.\n") +
+                           "1 is no overlap, 4 means that the origin of the analysis\n" +
+                           "moves by 1/4 each frame.");
+    for (int i = 0; i < NUM_OVERLAPS; i++)
+    {
+        overlapBox->addItem(String(overlapOptions[i]), i+1);
+    }
+    overlapBox->setBounds(310, 80, 100, 20);
+    overlapBox->setSelectedId(2);
+    overlapBox->addListener(this);
+    addAndMakeVisible(overlapBox);
+    
     //=========================================================================================
     // go button
     goButton = new TextButton("GO");
@@ -88,6 +106,11 @@ void MainComponent::comboBoxChanged(juce::ComboBox *box)
         fft_size = FFTSizes[box->getSelectedItemIndex()];
         log("FFT Size: " + String(fft_size) + "\n", console);
     }
+    else if (overlapBox == box)
+    {
+        overlap = overlapOptions[box->getSelectedItemIndex()];
+        log("Overlap: "+ String(overlap) + "\n", console);
+    }
 }
 
 void MainComponent::buttonClicked(juce::Button *button)
@@ -98,7 +121,7 @@ void MainComponent::buttonClicked(juce::Button *button)
         if (running == false)
         {
             log("-----------------------------------------------------\n", console);
-            log("                     BEGINNING                       \n", console);
+            log("---------------------BEGINNING-----------------------\n", console);
             // BEGIN
             // allocate space for audio
             log("Allocating shared buffers\n", console);
@@ -112,7 +135,7 @@ void MainComponent::buttonClicked(juce::Button *button)
             log("Done\n", console);
             //initialise string objects
             log("Initialising strings\n", console);
-            swivelString = new SwivelString(plan, audio, spectra, fft_size, deviceManager->getCurrentAudioDevice()->getCurrentSampleRate());
+            swivelString = new SwivelString(plan, audio, spectra, fft_size, deviceManager->getCurrentAudioDevice()->getCurrentSampleRate(), overlap);
             // actually start process (will require midi)
             deviceManager->addAudioCallback(swivelString);
             
@@ -120,7 +143,7 @@ void MainComponent::buttonClicked(juce::Button *button)
             goButton->setButtonText("STOP");
             reporter->setString(swivelString);
             reporter->setConsole(console);
-            reporter->startTimer(100);
+            reporter->startTimer(700);
         }
         else // running must == true
         {

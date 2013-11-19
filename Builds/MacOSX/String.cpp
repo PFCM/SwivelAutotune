@@ -11,8 +11,8 @@
 #include <Accelerate/Accelerate.h>
 
 //===========================================================
-SwivelString::SwivelString(fftw_plan plan, double* in, fftw_complex* out, int size, double sr) :
-    fft_plan(plan),input(in),output(out),fft_size(size),overlap(2),sample_rate(sr)
+SwivelString::SwivelString(fftw_plan plan, double* in, fftw_complex* out, int size, double sr, int ol) :
+    fft_plan(plan),input(in),output(out),fft_size(size),overlap(ol),sample_rate(sr)
 {
     input_buffer = (double*) malloc(sizeof(double)*fft_size);
     magnitudes = (double*) malloc(sizeof(double)*fft_size/2);
@@ -50,10 +50,14 @@ void SwivelString::audioDeviceIOCallback(const float **inputChannelData,
     //          copy part of it in, process, copy the rest in to the front
     if ((fft_size) - input_index >= numSamples)
     {
-        for (int i =0; i < numSamples; i++)
+       /* for (int i =0; i < numSamples; i++)
         {
             input_buffer[input_index+i] = inputChannelData[0][i];
-        }
+        }*/
+        // convert to double
+        vDSP_vspdp(inputChannelData[0], 1,       // input, stride
+                   input_buffer+input_index, 1,  // output, stride
+                   numSamples);                  // size
         input_index += numSamples;
         remaining = 0;
     }
@@ -71,6 +75,7 @@ void SwivelString::audioDeviceIOCallback(const float **inputChannelData,
     // copy into actual fft buffer and window
     if (input_index == fft_size)
     {
+        // could possibly do with a filter
         memcpy(input, input_buffer, fft_size*sizeof(double));
         Windowing::hann(input, fft_size);
         peaks.clearQuick();
@@ -79,6 +84,10 @@ void SwivelString::audioDeviceIOCallback(const float **inputChannelData,
         for (int i =minBin; i < maxBin; i++)
         {
             magnitudes[i] = magnitude(output[i]);
+        }
+        for (int i =minBin+1; i < maxBin; i++)
+        {
+            magnitudes[i] = (magnitudes[i]+magnitudes[i-1]) / 2.0 ;
         }
         for (int i = minBin+1; i < maxBin-1; i++)
         {
@@ -94,7 +103,7 @@ void SwivelString::audioDeviceIOCallback(const float **inputChannelData,
         // set index to the new end of the buffer
         // hop size is fft_size/overlap samples
         // memmove is like memcpy but is safe with overlapping regions
-        memmove(input_buffer, input_buffer+hop_size, sizeof(double)*fft_size-hop_size); // roll across one hop
+        memmove(input_buffer, input_buffer+hop_size, sizeof(double)*(fft_size-hop_size)); // roll across one hop
         input_index = fft_size-hop_size;
     
     }

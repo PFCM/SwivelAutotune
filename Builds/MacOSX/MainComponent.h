@@ -45,6 +45,13 @@ private:
     };
     const int NUM_FFT_SIZES = 7;
     int fft_size = 8192;
+    ScopedPointer<Label> overlapLabel;
+    ScopedPointer<ComboBox> overlapBox;
+    int overlapOptions[4] = {
+      1,2,3,4
+    };
+    const int NUM_OVERLAPS = 4;
+    int overlap = 2;
     
     ScopedPointer<TextButton> goButton;
     

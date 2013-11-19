@@ -20,7 +20,7 @@
 class SwivelString : public AudioIODeviceCallback
 {
 public:
-    SwivelString(fftw_plan, double* input, fftw_complex* output, int fft_size, double sr);
+    SwivelString(fftw_plan, double* input, fftw_complex* output, int fft_size, double sr, int ol);
     ~SwivelString();
     //===========================================
     void audioDeviceIOCallback(const float** inputChannelData,

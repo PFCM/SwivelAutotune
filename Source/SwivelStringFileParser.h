@@ -79,7 +79,7 @@ private:
     static void parseMidiMSBS(BufferedInputStream& file, StringDataBundle* data, String tag);
     static void fail(String msg);
     static StringArray split(String s, String pattern);
-    static void split_recurse(String s, String pattern, StringArray result);
+    static void split_recurse(String s, String& pattern, StringArray& result);
     
 };
 

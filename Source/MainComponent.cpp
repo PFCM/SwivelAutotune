@@ -7,6 +7,7 @@
 //
 
 #include "MainComponent.h"
+#include "SwivelStringFileParser.h"
 
 //==============================================================================================
 MainComponent::MainComponent()
@@ -206,17 +207,8 @@ void MainComponent::buttonClicked(juce::Button *button)
         if (chooser.browseForFileToOpen())
         {
             File chosen (chooser.getResult());
-            XmlElement* stringElement = XmlDocument::parse(chosen);
-            if (stringElement == nullptr)
-            {
-                std::cerr << "Some error";//xmlDoc.getLastParseError();
-            }
-            else
-            {
-                int index = stringElement->getIntAttribute("number");
-                std::cout << stringElement->getNumAttributes();
-                stringData.set(index, stringElement);
-            }
+            ScopedPointer<SwivelStringFileParser::StringDataBundle> bundle = SwivelStringFileParser::parseFile(chosen);
+            int t = 2+3+4+5;
         }
     }
 }

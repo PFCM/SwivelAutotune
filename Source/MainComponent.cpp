@@ -9,6 +9,8 @@
 #include "MainComponent.h"
 #include "SwivelStringFileParser.h"
 
+using namespace std;
+
 //==============================================================================================
 MainComponent::MainComponent()
 {
@@ -208,7 +210,20 @@ void MainComponent::buttonClicked(juce::Button *button)
         {
             File chosen (chooser.getResult());
             ScopedPointer<SwivelStringFileParser::StringDataBundle> bundle = SwivelStringFileParser::parseFile(chosen);
-            int t = 2+3+4+5;
+            cout << "Check data, string number: " << bundle->num << endl;
+            for (int i  = 0; i < bundle->fundamentals->size(); i++)
+            {
+                cout << "\tFundamental: " << (*bundle->fundamentals)[i] << endl;
+                for (int j = 0; j < (*bundle->measured_data)[i]->size(); j++)
+                    cout << "\t\t" << (*(*bundle->measured_data)[i])[j] << endl;
+            }
+            cout << "\tTargets\n";
+            for (int i = 0; i < bundle->targets->size(); i++)
+                cout << "\t\t" << (*bundle->targets)[i] << endl;
+            
+            cout << "\tMidi MSBS\n";
+            for (int i = 0; i < bundle->midi_msbs->size(); i++)
+                cout << "\t\t" << (int)(*bundle->midi_msbs)[i] <<endl;
         }
     }
 }

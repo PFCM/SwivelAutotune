@@ -78,8 +78,17 @@ private:
     static void parseTargets(BufferedInputStream& file, StringDataBundle* data, String tag);
     static void parseMidiMSBS(BufferedInputStream& file, StringDataBundle* data, String tag);
     static void fail(String msg);
+    
+    // utilities
+    /** Splits a string by occurrences of the given pattern.
+     *  Does so recursively, so a particularly long string might cause some issues. */
     static StringArray split(String s, String pattern);
+    /** internal recursive method for splitting the string, don't call from outside */
     static void split_recurse(String s, String& pattern, StringArray& result);
+    /** trims characters that aren't numeric from either side of a string */
+    static String trimToNumber(String &s);
+    /** Returns true if the character is not a number (including if it is a decimal point */
+    static bool isNotANumber(juce_wchar s);
     
 };
 

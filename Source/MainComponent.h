@@ -85,9 +85,8 @@ private:
     // bit of output
     ScopedPointer<TextEditor> console;
     
-    // for now just one string
-    OwnedArray<XmlElement> stringData;
-    ScopedPointer<SwivelString> swivelString;
+    // Strings!
+    OwnedArray<SwivelString> swivelStrings;
     
     // at the moment, let's have a button to choose a data file for this string
     ScopedPointer<TextButton> chooseFileButton;

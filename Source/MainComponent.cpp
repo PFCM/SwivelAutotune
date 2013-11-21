@@ -278,37 +278,41 @@ void MainComponent::log(juce::String text, TextEditor* console)
 void MainComponent::openFile()
 {
     File chosen = showDialogue(String("*.xml"));
-    try
+    if (chosen.existsAsFile())
     {
-        Array<StringDataBundle*>* data = SwivelStringFileParser::parseFile(chosen);
-        
-        for (int i = 0; i < data->size(); i++)
+        try
         {
-            StringDataBundle* bundle = data->getReference(i);
-            cout << "Check data, string number: " << bundle->num << endl;
-            for (int i  = 0; i < bundle->fundamentals->size(); i++)
-            {
-                cout << "\tFundamental: " << (*bundle->fundamentals)[i] << endl;
-                for (int j = 0; j < (*bundle->measured_data)[i]->size(); j++)
-                    cout << "\t\t" << (*(*bundle->measured_data)[i])[j] << endl;
-            }
-            cout << "\tTargets\n";
-            for (int i = 0; i < bundle->targets->size(); i++)
-                cout << "\t\t" << (*bundle->targets)[i] << endl;
+            Array<StringDataBundle*>* data = SwivelStringFileParser::parseFile(chosen);
             
-            cout << "\tMidi MSBS\n";
-            for (int i = 0; i < bundle->midi_msbs->size(); i++)
-                cout << "\t\t" << (int)(*bundle->midi_msbs)[i] <<endl;
+            for (int i = 0; i < data->size(); i++)
+            {
+                StringDataBundle* bundle = data->getReference(i);
+                cout << "Check data, string number: " << bundle->num << endl;
+                for (int i  = 0; i < bundle->fundamentals->size(); i++)
+                {
+                    cout << "\tFundamental: " << (*bundle->fundamentals)[i] << endl;
+                    for (int j = 0; j < (*bundle->measured_data)[i]->size(); j++)
+                        cout << "\t\t" << (*(*bundle->measured_data)[i])[j] << endl;
+                }
+                cout << "\tTargets\n";
+                for (int i = 0; i < bundle->targets->size(); i++)
+                    cout << "\t\t" << (*bundle->targets)[i] << endl;
+                
+                cout << "\tMidi MSBS\n";
+                for (int i = 0; i < bundle->midi_msbs->size(); i++)
+                    cout << "\t\t" << (int)(*bundle->midi_msbs)[i] <<endl;
+            }
+            
+            bundles.addArray(*data);
+            
         }
-        
-        bundles.addArray(*data);
-        
+        catch (SwivelStringFileParser::ParseException &e)
+        {
+            log(String("Parse Error: ") + e.what()  + "\n", console);
+        }
     }
-    catch (SwivelStringFileParser::ParseException &e)
-    {
-        log(String("Parse Error: ") + e.what()  + "\n", console);
-    }
-    
+    else
+        log("No file chosen", console);
 }
 
 File MainComponent::showDialogue(const juce::String &pattern)

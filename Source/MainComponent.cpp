@@ -209,6 +209,8 @@ void MainComponent::buttonClicked(juce::Button *button)
         if (chooser.browseForFileToOpen())
         {
             File chosen (chooser.getResult());
+            try
+            {
             ScopedPointer<SwivelStringFileParser::StringDataBundle> bundle = SwivelStringFileParser::parseFile(chosen);
             cout << "Check data, string number: " << bundle->num << endl;
             for (int i  = 0; i < bundle->fundamentals->size(); i++)
@@ -224,6 +226,11 @@ void MainComponent::buttonClicked(juce::Button *button)
             cout << "\tMidi MSBS\n";
             for (int i = 0; i < bundle->midi_msbs->size(); i++)
                 cout << "\t\t" << (int)(*bundle->midi_msbs)[i] <<endl;
+            }
+            catch (SwivelStringFileParser::ParseException &e)
+            {
+                cerr << "Parse Error: " << e.what() << endl;
+            }
         }
     }
 }

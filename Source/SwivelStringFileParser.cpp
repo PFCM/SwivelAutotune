@@ -14,9 +14,9 @@ using namespace std;
 SwivelStringFileParser::StringDataBundle* SwivelStringFileParser::parseFile(const juce::File& f)
 {
     // first we need to turn the file into a useable stream of data
-    FileInputStream file(f);
+    ScopedPointer<FileInputStream> file = new FileInputStream(f);
     // and now we can parse it
-    if (file.failedToOpen())
+    if (file->failedToOpen())
     {
         std::cerr << "Failed to open file " + f.getFileName() << std::endl;
         return nullptr;
@@ -24,7 +24,7 @@ SwivelStringFileParser::StringDataBundle* SwivelStringFileParser::parseFile(cons
     
     StringDataBundle* data = new StringDataBundle();
     
-    BufferedInputStream* stream = (new BufferedInputStream(&file, 256, true)); // need to make sure this doesn't leak
+    ScopedPointer<BufferedInputStream> stream = (new BufferedInputStream(file.release(), 256, true)); // need to make sure this doesn't leak
     
     parseSwivelStringElement(*stream, data);
     return data;

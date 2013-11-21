@@ -12,8 +12,22 @@
 #include "MainComponent.h"
 
 //===========================================================
-SwivelString::SwivelString(fftw_plan plan, double* in, fftw_complex* out, int size, double sr, int ol) :
-    fft_plan(plan),input(in),output(out),fft_size(size),overlap(ol),sample_rate(sr)
+// Constructs a new string.
+// Constructor is currently has an absurdly large number of parameters
+// and may require more, but at least once it is created it is initialised.
+// Note that the storage space for the input and output of the fft is
+// allocated OUTSIDE this class, it can be shared between strings but
+// will have to be tremendously careful only one of them is running at the same time
+// or awkwardness might ensue.
+// This shouldn't be a problem given if more than one string is grabbing the audio,
+// there are probably some other serious issues
+SwivelString::SwivelString(fftw_plan plan,      // The plan to use for the fft
+                           double* in,          // shared memory for audio input
+                           fftw_complex* out,   // shared memory for output
+                           int size,            // size of the fft
+                           double sr,           // sample rate of the input audio device
+                           int ol)              // amount of overlap
+    :    fft_plan(plan),input(in),output(out),fft_size(size),overlap(ol),sample_rate(sr)
 {
     input_buffer = (double*) malloc(sizeof(double)*fft_size);
     magnitudes = (double*) malloc(sizeof(double)*fft_size/2);
@@ -22,12 +36,28 @@ SwivelString::SwivelString(fftw_plan plan, double* in, fftw_complex* out, int si
     
     minBin = 0;
     maxBin = fft_size/2;
+    
+    
+    // for now we will just stuff some dummy data into the midibuffer
+    for (int i = 0; i < 5; i++)
+    {
+        midiData.addEvent(MidiMessage(144, 66, i), i*sample_rate/2);
+    }
 }
 
 SwivelString::~SwivelString()
 {
     free(magnitudes);
     free(input_buffer);
+}
+
+// initialises from parsed data
+void SwivelString::initialiseFromBundle(SwivelStringFileParser::StringDataBundle* bundle)
+{
+    midiMsbs = *(bundle->midi_msbs);
+    targets = *(bundle->targets);
+    fundamentals = *(bundle->fundamentals);
+    measurements = *(bundle->measured_data);
 }
 
 //============================================================
@@ -171,6 +201,12 @@ void SwivelString::window(double *input, int size)
         default: // default is no windowing
             break;
     }
+}
+
+//================================================================================
+MidiBuffer* SwivelString::getMidiBuffer()
+{
+    return &midiData;
 }
 
 

@@ -107,7 +107,7 @@ MainComponent::MainComponent()
     //=========================================================================================
     // go button
     goButton = new TextButton("GO");
-    goButton->setBounds(getWidth()/2 - 100, 200, 200, 30);
+    goButton->setBounds(getWidth()/2 - 100, 190, 200, 30);
     goButton->addListener(this);
     addAndMakeVisible(goButton);
     
@@ -116,7 +116,7 @@ MainComponent::MainComponent()
     console->setMultiLine(true);
     console->setReadOnly(true);
     console->setCaretVisible(false);
-    console->setBounds(10, 240, 680, 50);
+    console->setBounds(10, 220, 680, 70);
     addAndMakeVisible(console);
     
     
@@ -258,7 +258,7 @@ void MainComponent::begin()
     //initialise string objects
     log("Initialising strings\n", console);
     swivelString = new SwivelString(plan, audio, spectra, fft_size, deviceManager->getCurrentAudioDevice()->getCurrentSampleRate(), overlap);
-    // actually start process (will require midi)
+    // start listening
     deviceManager->addAudioCallback(swivelString);
     
     goButton->setButtonText("STOP");
@@ -267,16 +267,9 @@ void MainComponent::begin()
     reporter->startTimer(700);
     
     // try out some MIDI
-    
-    double sr = deviceManager->getCurrentAudioDevice()->getCurrentSampleRate();
-    MidiBuffer messages;
-    for (int i =0; i < 10; i++)
-    {
-        messages.addEvent(MidiMessage(146,i,i), i*(int)sr);
-    }
     MidiOutput* midi = midiOutBox->getSelectedOutput();
     midi->startBackgroundThread();
-    midi->sendBlockOfMessages(messages, Time::getMillisecondCounter()+1000, sr);
+    midi->sendBlockOfMessages(*swivelString->getMidiBuffer(), Time::getMillisecondCounter()+1000, deviceManager->getCurrentAudioDevice()->getCurrentSampleRate());
 }
 
 void MainComponent::end()

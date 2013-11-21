@@ -16,6 +16,7 @@
 #include <iostream>
 #include "../JuceLibraryCode/JuceHeader.h"
 #include <fftw3.h>
+#include "SwivelStringFileParser.h"
 
 
 class SwivelString : public AudioIODeviceCallback
@@ -31,10 +32,33 @@ public:
                                int numSamples);
     void audioDeviceAboutToStart(AudioIODevice* device);
     void audioDeviceStopped();
+    void initialiseFromBundle(SwivelStringFileParser::StringDataBundle* bundle);
     
     //===========================================
+    /** Returns current list of peaks in Hz */
     Array<double>* getCurrentPeaksAsFrequencies();
+    /** Returns the midi data required to make things go */
+    MidiBuffer* getMidiBuffer();
+    
 private:
+    //===========================================
+    // how to make it go
+    MidiBuffer midiData;
+    
+    //=====INFO OF THE STRING====================
+    /** the measured characteristics (2 or more) */
+    OwnedArray<Array<double>> measurements;
+    /** The open frequencies of the strings where the measurements
+     *   were taken, matches up by index to the measurements */
+    Array<double> fundamentals;
+    /** The desired frequencies per ``fret'' */
+    Array<double> targets;
+    /** The midi pitchbend values (msb only) that created the 
+     *  characterisation tables, essentially the values which
+     *  we want to produce the target frequencies             */
+    Array<uint8> midiMsbs;
+    
+    //=====FFT STUFF=============================
     fftw_plan fft_plan;
     double* input;
     fftw_complex* output;

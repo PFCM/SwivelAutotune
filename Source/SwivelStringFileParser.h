@@ -40,7 +40,7 @@ public:
         /** The number of the string, used to tell them apart */
         int num;
         /** The measurements of the string at various frequencies */
-        Array<Array<double>*>* measured_data;
+        OwnedArray<Array<double>>* measured_data;
         /** The fundamental of the string, indices corresponding to measured_data */
         Array<double>* fundamentals;
         /** The target frequencies */
@@ -50,7 +50,7 @@ public:
         
         StringDataBundle()
         {
-            measured_data = new Array<Array<double>*>();
+            measured_data = new OwnedArray<Array<double>>();
             fundamentals = new Array<double>();
             targets = new Array<double>();
             midi_msbs = new Array<uint8>();

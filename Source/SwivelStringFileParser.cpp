@@ -49,7 +49,7 @@ void SwivelStringFileParser::parseSwivelStringElement(juce::BufferedInputStream 
     String number = tag.substring(nindex+7); // should be the number and the end of the tag
     number = trimToNumber(number);
     int num = number.getIntValue();
-    data->num = num;
+    data->num = num; // NOTE - ERRORS HERE IN THE FILE WILL NOT CRASH THE PARSER, THE STRING WILL JUST HAVE VALUE ONE
     
     tag = file.readNextLine();
     
@@ -57,7 +57,7 @@ void SwivelStringFileParser::parseSwivelStringElement(juce::BufferedInputStream 
     {
         tag = tag.trim();
         if (file.isExhausted())
-            fail("missing end tag");
+            fail("missing '</swivelstring>' end tag");
         
         if (tag.startsWith("<measurements"))
             parseMeasurements(file, data, tag);
@@ -70,17 +70,30 @@ void SwivelStringFileParser::parseSwivelStringElement(juce::BufferedInputStream 
         
         tag = file.readNextLine();
     }
+    
+    if (data->midi_msbs->size() == 0)
+        fail("Did not find any '<midimsbs>");
+    if (data->measured_data->size() < 2)
+        fail("Need at least two '<measurements>' to work, found " + String(data->measured_data->size()));
+    if (data->fundamentals->size() != data->measured_data->size())
+        fail("Ended up with a different number of 'fundamental' attributes to the number of '<measurements>'");
+    if (data->targets->size() == 0)
+        fail("Did not find any '<targets>'");
 }
 
 void SwivelStringFileParser::parseMeasurements(juce::BufferedInputStream &file, SwivelStringFileParser::StringDataBundle *data, juce::String tag)
 {
-    int findex = tag.indexOfWholeWord("fundamental=");
+    int findex = tag.indexOfWholeWord("fundamental="); // IF THIS IS -1, trimToNumber ENSURES WE STILL ACTUALLY GET A RESULT AS LONG AS THE NUMBER IS THERE
     String attr = tag.substring(findex+12);
     // remove quotes and >
     // using built in string methods does not in fact remove anything
     // so have to do it by hand
     attr = trimToNumber(attr);
-    data->fundamentals->add(attr.unquoted().getDoubleValue());
+    double num = attr.getDoubleValue();
+    // 0 has to be an illegal value because it is also the result of an unsuccessful parse
+    if (num == 0)
+        fail("Couldn't find a number for the fundamental. Or it is 0");
+    data->fundamentals->add(num);
     
     // now grab the list
     String line = file.readNextLine();
@@ -105,6 +118,9 @@ void SwivelStringFileParser::parseMidiMSBS(juce::BufferedInputStream &file, Swiv
     String line = file.readNextLine();
     StringArray splitLine = split(line, ",");
     
+    // NOTE
+    // IF THE NUMBERS ARE MISSING COMMAS OR TOO LARGE ETC, THEY
+    // WILL JUST WRAP AROUND 255, MIGHT BE TOUGH TO SPOT
     for (int i = 0; i < splitLine.size(); i++)
         data->midi_msbs->add((uint8)splitLine[i].getIntValue());
     
@@ -116,7 +132,7 @@ void SwivelStringFileParser::parseMidiMSBS(juce::BufferedInputStream &file, Swiv
 
 void SwivelStringFileParser::parseTargets(juce::BufferedInputStream &file, SwivelStringFileParser::StringDataBundle *data, juce::String tag)
 {
-    if (data->targets->size() != 0) fail("probably more that one '<targets>' tag in the file");
+    if (data->targets->size() != 0) fail("probably more than one '<targets>' tag in the file");
     String line = file.readNextLine();
     StringArray splitLine = split(line, ",");
     

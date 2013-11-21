@@ -198,11 +198,11 @@
             ignoreCount = "0"
             continueAfterRunningActions = "No"
             filePath = "../../Source/MainComponent.cpp"
-            timestampString = "406672633.475786"
+            timestampString = "406692633.853629"
             startingColumnNumber = "9223372036854775807"
             endingColumnNumber = "9223372036854775807"
-            startingLineNumber = "214"
-            endingLineNumber = "214"
+            startingLineNumber = "216"
+            endingLineNumber = "216"
             landmarkName = "MainComponent::buttonClicked(juce::Button *button)"
             landmarkType = "5">
             <Locations>
@@ -213,12 +213,12 @@
                   symbolName = "MainComponent::buttonClicked(juce::Button*)"
                   moduleName = "SwivelAutotune"
                   urlString = "file:///Users/pfcmathews/Documents/SwivelAutotune/Source/MainComponent.cpp"
-                  timestampString = "406674857.792128"
+                  timestampString = "406694525.246458"
                   startingColumnNumber = "9223372036854775807"
                   endingColumnNumber = "9223372036854775807"
-                  startingLineNumber = "214"
-                  endingLineNumber = "214"
-                  offsetFromSymbolStart = "613">
+                  startingLineNumber = "216"
+                  endingLineNumber = "216"
+                  offsetFromSymbolStart = "619">
                </Location>
                <Location
                   shouldBeEnabled = "Yes"
@@ -227,12 +227,12 @@
                   symbolName = "MainComponent::buttonClicked(juce::Button*)"
                   moduleName = "SwivelAutotune"
                   urlString = "file:///Users/pfcmathews/Documents/SwivelAutotune/Source/MainComponent.cpp"
-                  timestampString = "406674857.792456"
+                  timestampString = "406694525.246628"
                   startingColumnNumber = "9223372036854775807"
                   endingColumnNumber = "9223372036854775807"
-                  startingLineNumber = "214"
-                  endingLineNumber = "214"
-                  offsetFromSymbolStart = "1335">
+                  startingLineNumber = "216"
+                  endingLineNumber = "216"
+                  offsetFromSymbolStart = "1540">
                </Location>
             </Locations>
          </BreakpointContent>
@@ -256,15 +256,15 @@
       <BreakpointProxy
          BreakpointExtensionID = "Xcode.Breakpoint.FileBreakpoint">
          <BreakpointContent
-            shouldBeEnabled = "No"
+            shouldBeEnabled = "Yes"
             ignoreCount = "0"
             continueAfterRunningActions = "No"
             filePath = "../../Source/SwivelStringFileParser.cpp"
-            timestampString = "406674857.760823"
+            timestampString = "406695194.256562"
             startingColumnNumber = "9223372036854775807"
             endingColumnNumber = "9223372036854775807"
-            startingLineNumber = "77"
-            endingLineNumber = "77"
+            startingLineNumber = "86"
+            endingLineNumber = "86"
             landmarkName = "SwivelStringFileParser::parseMeasurements(juce::BufferedInputStream &amp;file, SwivelStringFileParser::StringDataBundle *data, juce::String tag)"
             landmarkType = "5">
          </BreakpointContent>
@@ -276,11 +276,11 @@
             ignoreCount = "0"
             continueAfterRunningActions = "No"
             filePath = "../../Source/SwivelStringFileParser.cpp"
-            timestampString = "406674857.760823"
+            timestampString = "406695194.256562"
             startingColumnNumber = "9223372036854775807"
             endingColumnNumber = "9223372036854775807"
-            startingLineNumber = "111"
-            endingLineNumber = "111"
+            startingLineNumber = "127"
+            endingLineNumber = "127"
             landmarkName = "SwivelStringFileParser::parseMidiMSBS(juce::BufferedInputStream &amp;file, SwivelStringFileParser::StringDataBundle *data, juce::String tag)"
             landmarkType = "5">
          </BreakpointContent>
@@ -292,11 +292,11 @@
             ignoreCount = "0"
             continueAfterRunningActions = "No"
             filePath = "../../Source/SwivelStringFileParser.cpp"
-            timestampString = "406674857.760823"
+            timestampString = "406695194.256562"
             startingColumnNumber = "9223372036854775807"
             endingColumnNumber = "9223372036854775807"
-            startingLineNumber = "109"
-            endingLineNumber = "109"
+            startingLineNumber = "125"
+            endingLineNumber = "125"
             landmarkName = "SwivelStringFileParser::parseMidiMSBS(juce::BufferedInputStream &amp;file, SwivelStringFileParser::StringDataBundle *data, juce::String tag)"
             landmarkType = "5">
          </BreakpointContent>
@@ -324,11 +324,11 @@
             ignoreCount = "0"
             continueAfterRunningActions = "No"
             filePath = "../../Source/SwivelStringFileParser.cpp"
-            timestampString = "406674857.760823"
+            timestampString = "406695194.256562"
             startingColumnNumber = "9223372036854775807"
             endingColumnNumber = "9223372036854775807"
-            startingLineNumber = "110"
-            endingLineNumber = "110"
+            startingLineNumber = "126"
+            endingLineNumber = "126"
             landmarkName = "SwivelStringFileParser::parseMidiMSBS(juce::BufferedInputStream &amp;file, SwivelStringFileParser::StringDataBundle *data, juce::String tag)"
             landmarkType = "5">
          </BreakpointContent>
@@ -340,11 +340,11 @@
             ignoreCount = "0"
             continueAfterRunningActions = "No"
             filePath = "../../Source/SwivelStringFileParser.cpp"
-            timestampString = "406674857.760823"
+            timestampString = "406695194.256562"
             startingColumnNumber = "9223372036854775807"
             endingColumnNumber = "9223372036854775807"
-            startingLineNumber = "83"
-            endingLineNumber = "83"
+            startingLineNumber = "96"
+            endingLineNumber = "96"
             landmarkName = "SwivelStringFileParser::parseMeasurements(juce::BufferedInputStream &amp;file, SwivelStringFileParser::StringDataBundle *data, juce::String tag)"
             landmarkType = "5">
          </BreakpointContent>
@@ -356,11 +356,11 @@
             ignoreCount = "0"
             continueAfterRunningActions = "No"
             filePath = "../../Source/SwivelStringFileParser.cpp"
-            timestampString = "406674857.760823"
+            timestampString = "406695194.256562"
             startingColumnNumber = "9223372036854775807"
             endingColumnNumber = "9223372036854775807"
-            startingLineNumber = "162"
-            endingLineNumber = "162"
+            startingLineNumber = "178"
+            endingLineNumber = "178"
             landmarkName = "SwivelStringFileParser::trimToNumber(juce::String &amp;s)"
             landmarkType = "5">
          </BreakpointContent>

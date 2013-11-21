@@ -229,7 +229,7 @@ void MainComponent::buttonClicked(juce::Button *button)
             }
             catch (SwivelStringFileParser::ParseException &e)
             {
-                cerr << "Parse Error: " << e.what() << endl;
+                log(String("Parse Error: ") + e.what() + "\n", console);
             }
         }
     }

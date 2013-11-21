@@ -17,7 +17,7 @@
 // and may require more, but at least once it is created it is initialised.
 // Note that the storage space for the input and output of the fft is
 // allocated OUTSIDE this class, it can be shared between strings but
-// will have to be tremendously careful only one of them is running at the same time
+// will have to be careful only one of them is running at the same time
 // or awkwardness might ensue.
 // This shouldn't be a problem given if more than one string is grabbing the audio,
 // there are probably some other serious issues
@@ -54,10 +54,10 @@ SwivelString::~SwivelString()
 // initialises from parsed data
 void SwivelString::initialiseFromBundle(SwivelStringFileParser::StringDataBundle* bundle)
 {
-    midiMsbs = *(bundle->midi_msbs);
-    targets = *(bundle->targets);
-    fundamentals = *(bundle->fundamentals);
-    measurements = *(bundle->measured_data);
+    midiMsbs = bundle->midi_msbs;
+    targets = bundle->targets;
+    fundamentals = bundle->fundamentals;
+    measurements = bundle->measured_data;
 }
 
 //============================================================

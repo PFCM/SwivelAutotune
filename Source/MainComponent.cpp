@@ -202,36 +202,7 @@ void MainComponent::buttonClicked(juce::Button *button)
     }
     else if (chooseFileButton == button)
     {
-        FileChooser chooser("Choose XML data file", // title
-                            File::getSpecialLocation(File::userHomeDirectory), // directory
-                            "*.xml"); // pattern (also bool to use native dialog, default true)
-        
-        if (chooser.browseForFileToOpen())
-        {
-            File chosen (chooser.getResult());
-            try
-            {
-            ScopedPointer<SwivelStringFileParser::StringDataBundle> bundle = SwivelStringFileParser::parseFile(chosen);
-            cout << "Check data, string number: " << bundle->num << endl;
-            for (int i  = 0; i < bundle->fundamentals->size(); i++)
-            {
-                cout << "\tFundamental: " << (*bundle->fundamentals)[i] << endl;
-                for (int j = 0; j < (*bundle->measured_data)[i]->size(); j++)
-                    cout << "\t\t" << (*(*bundle->measured_data)[i])[j] << endl;
-            }
-            cout << "\tTargets\n";
-            for (int i = 0; i < bundle->targets->size(); i++)
-                cout << "\t\t" << (*bundle->targets)[i] << endl;
-            
-            cout << "\tMidi MSBS\n";
-            for (int i = 0; i < bundle->midi_msbs->size(); i++)
-                cout << "\t\t" << (int)(*bundle->midi_msbs)[i] <<endl;
-            }
-            catch (SwivelStringFileParser::ParseException &e)
-            {
-                log(String("Parse Error: ") + e.what() + "\n", console);
-            }
-        }
+        openFile();
     }
 }
 
@@ -258,6 +229,8 @@ void MainComponent::begin()
     //initialise string objects
     log("Initialising strings\n", console);
     swivelString = new SwivelString(plan, audio, spectra, fft_size, deviceManager->getCurrentAudioDevice()->getCurrentSampleRate(), overlap);
+    if (bundles.size() >0)
+        swivelString->initialiseFromBundle((bundles)[0]);
     // start listening
     deviceManager->addAudioCallback(swivelString);
     
@@ -298,9 +271,60 @@ void MainComponent::handleIncomingMidiMessage(juce::MidiInput *source, const juc
 void MainComponent::log(juce::String text, TextEditor* console)
 {
     console->setCaretPosition(console->getText().length());
-   console->insertTextAtCaret(text);
+    console->insertTextAtCaret(text);
 }
 
+//============FILE FUNCTIONS=====================================================================
+void MainComponent::openFile()
+{
+    File chosen = showDialogue(String("*.xml"));
+    try
+    {
+        Array<StringDataBundle*>* data = SwivelStringFileParser::parseFile(chosen);
+        
+        for (int i = 0; i < data->size(); i++)
+        {
+            StringDataBundle* bundle = data->getReference(i);
+            cout << "Check data, string number: " << bundle->num << endl;
+            for (int i  = 0; i < bundle->fundamentals->size(); i++)
+            {
+                cout << "\tFundamental: " << (*bundle->fundamentals)[i] << endl;
+                for (int j = 0; j < (*bundle->measured_data)[i]->size(); j++)
+                    cout << "\t\t" << (*(*bundle->measured_data)[i])[j] << endl;
+            }
+            cout << "\tTargets\n";
+            for (int i = 0; i < bundle->targets->size(); i++)
+                cout << "\t\t" << (*bundle->targets)[i] << endl;
+            
+            cout << "\tMidi MSBS\n";
+            for (int i = 0; i < bundle->midi_msbs->size(); i++)
+                cout << "\t\t" << (int)(*bundle->midi_msbs)[i] <<endl;
+        }
+        
+        bundles.addArray(*data);
+        
+    }
+    catch (SwivelStringFileParser::ParseException &e)
+    {
+        log(String("Parse Error: ") + e.what()  + "\n", console);
+    }
+    
+}
+
+File MainComponent::showDialogue(const juce::String &pattern)
+{
+    FileChooser chooser("Choose file", // title
+                        File::getSpecialLocation(File::userDocumentsDirectory), // directory
+                        pattern); // pattern (also bool to use native dialog, default true)
+    
+    if (chooser.browseForFileToOpen())
+    {
+        return chooser.getResult();
+    }
+    return File();
+}
+
+//===========REPORTER MEMBER FUNCTIONS===========================================================
 MainComponent::Reporter::Reporter(SwivelString* r, TextEditor* log) : swString(r), console(log)
 {
     

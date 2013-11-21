@@ -47,16 +47,16 @@ private:
     
     //=====INFO OF THE STRING====================
     /** the measured characteristics (2 or more) */
-    OwnedArray<Array<double>> measurements;
+    ScopedPointer<OwnedArray<Array<double>>> measurements;
     /** The open frequencies of the strings where the measurements
      *   were taken, matches up by index to the measurements */
-    Array<double> fundamentals;
+    ScopedPointer<Array<double>> fundamentals;
     /** The desired frequencies per ``fret'' */
-    Array<double> targets;
+    ScopedPointer<Array<double>> targets;
     /** The midi pitchbend values (msb only) that created the 
      *  characterisation tables, essentially the values which
      *  we want to produce the target frequencies             */
-    Array<uint8> midiMsbs;
+    ScopedPointer<Array<uint8>> midiMsbs;
     
     //=====FFT STUFF=============================
     fftw_plan fft_plan;

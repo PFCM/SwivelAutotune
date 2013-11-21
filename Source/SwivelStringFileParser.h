@@ -40,13 +40,13 @@ public:
         /** The number of the string, used to tell them apart */
         int num;
         /** The measurements of the string at various frequencies */
-        OwnedArray<Array<double>>* measured_data;
+        ScopedPointer<OwnedArray<Array<double>>> measured_data;
         /** The fundamental of the string, indices corresponding to measured_data */
-        Array<double>* fundamentals;
+        ScopedPointer<Array<double>> fundamentals;
         /** The target frequencies */
-        Array<double>* targets;
+        ScopedPointer<Array<double>> targets;
         /** The pitch-bend MSBs that should produce these targets */
-        Array<uint8>* midi_msbs;
+        ScopedPointer<Array<uint8>> midi_msbs;
         
         StringDataBundle()
         {
@@ -60,7 +60,7 @@ public:
     /** Parses the file, returns the data if it succeeds.
      *  Should hopefully print out some meaningful errors if it doesn't (to std::cerr most likely).
      */
-    static StringDataBundle* parseFile(const File& f);
+    static Array<StringDataBundle*>* parseFile(const File& f);
     
     class ParseException : public std::exception
     {

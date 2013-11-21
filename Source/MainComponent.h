@@ -40,6 +40,9 @@ public:
     };
     
 private:
+    // for ease of use
+    typedef SwivelStringFileParser::StringDataBundle StringDataBundle;
+    
     //GUI stuff
     ScopedPointer<AudioDeviceManager> deviceManager;
     ScopedPointer<AudioDeviceSelectorComponent> audioSelector; // this exists
@@ -88,6 +91,9 @@ private:
     
     // at the moment, let's have a button to choose a data file for this string
     ScopedPointer<TextButton> chooseFileButton;
+    // we need some collection to hold the data
+    OwnedArray<StringDataBundle> bundles;
+    
     // data (this is shared between strings)
     double* audio;
     fftw_complex* spectra;
@@ -110,6 +116,14 @@ private:
     };
     ScopedPointer<Reporter> reporter;
     
+    
+    //============MEMBER FUNCTIONS=============================
+    /** Opens a file and attempts to parse it, adding all the results to the
+        array of bundles */
+    void openFile();
+    /** Shows a file chooser dialogue to search for files with the given pattern, returns choice
+        if made otherwise an invalid file. */
+    File showDialogue(const String& pattern);
     //==========================================================
     //////////////////////////////////////////////////////////////////////
     //////////////////////////////////////////////////////////////////////

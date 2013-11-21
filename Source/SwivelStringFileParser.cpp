@@ -11,7 +11,7 @@
 
 using namespace std;
 
-SwivelStringFileParser::StringDataBundle* SwivelStringFileParser::parseFile(const juce::File& f)
+Array<SwivelStringFileParser::StringDataBundle*>* SwivelStringFileParser::parseFile(const juce::File& f)
 {
     // first we need to turn the file into a useable stream of data
     ScopedPointer<FileInputStream> file = new FileInputStream(f);
@@ -22,11 +22,17 @@ SwivelStringFileParser::StringDataBundle* SwivelStringFileParser::parseFile(cons
         return nullptr;
     }
     
-    StringDataBundle* data = new StringDataBundle();
     
     ScopedPointer<BufferedInputStream> stream = (new BufferedInputStream(file.release(), 256, true)); // need to make sure this doesn't leak
     
-    parseSwivelStringElement(*stream, data);
+    Array<StringDataBundle*>* data = new Array<StringDataBundle*>();
+    
+    while (!stream->isExhausted())
+    {
+        StringDataBundle* bundle = new StringDataBundle();
+        parseSwivelStringElement(*stream, bundle);
+        data->add(bundle);
+    }
     return data;
 }
 

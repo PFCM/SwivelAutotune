@@ -12,6 +12,7 @@
 		21B6438A0252A0AF0C375C99 /* Carbon.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = 41D6C712F06C47C54753C2C5 /* Carbon.framework */; };
 		2B0FF0FCB8F7A318C4ABCD42 /* juce_audio_processors.mm in Sources */ = {isa = PBXBuildFile; fileRef = 719FB52ED246920763A39CC5 /* juce_audio_processors.mm */; };
 		32179465183E98C30002F70E /* MultipleString.xml in Resources */ = {isa = PBXBuildFile; fileRef = 32179464183E98C30002F70E /* MultipleString.xml */; };
+		32179468183EB2520002F70E /* AnalysisThread.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 32179466183EB2520002F70E /* AnalysisThread.cpp */; };
 		3243393A183C5AEB009793BE /* MainComponent.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 32433934183C5AEB009793BE /* MainComponent.cpp */; };
 		3243393B183C5AEB009793BE /* String.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 32433936183C5AEB009793BE /* String.cpp */; };
 		3243393C183C5AEB009793BE /* SwivelStringFileParser.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 32433938183C5AEB009793BE /* SwivelStringFileParser.cpp */; };
@@ -215,6 +216,8 @@
 		3184CB50353EBA08E84F2D47 /* juce_ValueTree.cpp */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.cpp.cpp; name = juce_ValueTree.cpp; path = ../../JuceLibraryCode/modules/juce_data_structures/values/juce_ValueTree.cpp; sourceTree = SOURCE_ROOT; };
 		31DEC60FAE7458F1BDC046F5 /* juce_AudioCDReader.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; name = juce_AudioCDReader.h; path = ../../JuceLibraryCode/modules/juce_audio_devices/audio_cd/juce_AudioCDReader.h; sourceTree = SOURCE_ROOT; };
 		32179464183E98C30002F70E /* MultipleString.xml */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = text.xml; name = MultipleString.xml; path = ../../MultipleString.xml; sourceTree = "<group>"; };
+		32179466183EB2520002F70E /* AnalysisThread.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; name = AnalysisThread.cpp; path = ../../Source/AnalysisThread.cpp; sourceTree = "<group>"; };
+		32179467183EB2520002F70E /* AnalysisThread.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; name = AnalysisThread.h; path = ../../Source/AnalysisThread.h; sourceTree = "<group>"; };
 		32433934183C5AEB009793BE /* MainComponent.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; name = MainComponent.cpp; path = ../../Source/MainComponent.cpp; sourceTree = "<group>"; };
 		32433935183C5AEB009793BE /* MainComponent.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; name = MainComponent.h; path = ../../Source/MainComponent.h; sourceTree = "<group>"; };
 		32433936183C5AEB009793BE /* String.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; name = String.cpp; path = ../../Source/String.cpp; sourceTree = "<group>"; };
@@ -2397,6 +2400,8 @@
 			children = (
 				32433934183C5AEB009793BE /* MainComponent.cpp */,
 				32433935183C5AEB009793BE /* MainComponent.h */,
+				32179466183EB2520002F70E /* AnalysisThread.cpp */,
+				32179467183EB2520002F70E /* AnalysisThread.h */,
 				32433936183C5AEB009793BE /* String.cpp */,
 				32433937183C5AEB009793BE /* String.h */,
 				32433938183C5AEB009793BE /* SwivelStringFileParser.cpp */,
@@ -2742,6 +2747,7 @@
 				72B03CDEBDCF8E56EB2B1AD9 /* juce_opengl.mm in Sources */,
 				3243393B183C5AEB009793BE /* String.cpp in Sources */,
 				38FD7DA8D6B179989105CD62 /* juce_video.mm in Sources */,
+				32179468183EB2520002F70E /* AnalysisThread.cpp in Sources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};

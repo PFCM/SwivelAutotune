@@ -12,6 +12,7 @@
 #include "../JuceLibraryCode/JuceHeader.h"
 #include "String.h"
 #include "MidiDeviceSelector.h"
+#include "AnalysisThread.h"
 
 class MainComponent : public    Component,
                       private   ComboBox::Listener,
@@ -86,7 +87,7 @@ private:
     ScopedPointer<TextEditor> console;
     
     // Strings!
-    OwnedArray<SwivelString> swivelStrings;
+    OwnedArray<SwivelString, CriticalSection> swivelStrings;
     
     // at the moment, let's have a button to choose a data file for this string
     ScopedPointer<TextButton> chooseFileButton;
@@ -115,6 +116,9 @@ private:
     };
     ScopedPointer<Reporter> reporter;
     
+    //=========================================================
+    // the thread which does the calculation work
+    ScopedPointer<AnalysisThread> analysisThread;
     
     //============MEMBER FUNCTIONS=============================
     /** Opens a file and attempts to parse it, adding all the results to the

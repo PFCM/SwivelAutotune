@@ -1,8 +1,0 @@
-<!ELEMENT swivelstring (measurements+, targets?, midimsbs?)>
-<!ELEMENT measurements (#PCDATA)>
-<!ELEMENT targets (#PCDATA)>
-<!ELEMENT midimsbs (#PCDATA)>
-<!ATTLIST swivelstring
-    number CDATA #REQUIRED >
-<!ATTLIST measurements
-    fundamental CDATA #REQUIRED>

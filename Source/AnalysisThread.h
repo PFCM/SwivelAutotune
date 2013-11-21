@@ -22,7 +22,7 @@ class AnalysisThread : public Thread
 {
 public:
     // Constructs a new thread, needs a few references to get going
-    AnalysisThread(AudioDeviceManager *manager, MidiOutput *mout, OwnedArray<SwivelString> *strings);
+    AnalysisThread(AudioDeviceManager *manager, MidiOutput *mout, OwnedArray<SwivelString, CriticalSection> *strings);
     
     /** Run method, gets called in a new thread when start() is called,
      *  Don't call this yourself, unless you don't actually want it to 
@@ -31,13 +31,23 @@ public:
     
     /** Sets the console to use for output. If nullptr nothing is output */
     void setConsole(TextEditor* where);
+    /** Sets the FFT size and overlap (in that order)*/
+    void setFFTParams(int size, int overlap);
     
 private:
     // The audio input device
     AudioDeviceManager* deviceManager;
     MidiOutput* midiOut;
-    OwnedArray<SwivelString>* swivelStrings;
+    OwnedArray<SwivelString, CriticalSection>* swivelStrings;
     TextEditor* console;
+    
+    // processing buffers
+    double* audio;
+    fftw_complex* spectrum;
+    // processing params
+    int fft_size;
+    int overlap;
+    int hop_size;
     
     void log(String message);
 };

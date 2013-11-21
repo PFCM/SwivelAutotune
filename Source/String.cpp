@@ -21,21 +21,8 @@
 // or awkwardness might ensue.
 // This shouldn't be a problem given if more than one string is grabbing the audio,
 // there are probably some other serious issues
-SwivelString::SwivelString(fftw_plan plan,      // The plan to use for the fft
-                           double* in,          // shared memory for audio input
-                           fftw_complex* out,   // shared memory for output
-                           int size,            // size of the fft
-                           double sr,           // sample rate of the input audio device
-                           int ol)              // amount of overlap
-    :    fft_plan(plan),input(in),output(out),fft_size(size),overlap(ol),sample_rate(sr)
+SwivelString::SwivelString()
 {
-    input_buffer = (double*) malloc(sizeof(double)*fft_size);
-    magnitudes = (double*) malloc(sizeof(double)*fft_size/2);
-    
-    hop_size = fft_size/overlap;
-    
-    minBin = 0;
-    maxBin = fft_size/2;
     
     
     // for now we will just stuff some dummy data into the midibuffer
@@ -58,6 +45,25 @@ void SwivelString::initialiseFromBundle(SwivelStringFileParser::StringDataBundle
     targets = bundle->targets;
     fundamentals = bundle->fundamentals;
     measurements = bundle->measured_data;
+}
+// initialises audio requirements
+void SwivelString::initialiseAudioParameters(fftw_plan p, double *in, fftw_complex *out, int fft_size, double sr, int ol)
+{
+    fft_plan = p;
+    input = in;
+    output = out;
+    this->fft_size = fft_size;
+    sample_rate = sr;
+    overlap = ol;
+    
+    
+    input_buffer = (double*) malloc(sizeof(double)*fft_size);
+    magnitudes = (double*) malloc(sizeof(double)*fft_size/2);
+    
+    hop_size = fft_size/overlap;
+    
+    minBin = 0;
+    maxBin = fft_size/2;
 }
 
 //============================================================

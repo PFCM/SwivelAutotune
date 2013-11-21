@@ -119,16 +119,11 @@ MainComponent::MainComponent()
     console->setBounds(10, 220, 680, 70);
     addAndMakeVisible(console);
     
-    
-    //=========================================================================================
-    //Strings
 }
 
 MainComponent::~MainComponent()
 {
-    // clean up
-    deviceManager = 0;
-    audioSelector = 0;
+    // only one of these, only destroyed when application exits
 }
 
 //==============================================================================================
@@ -212,9 +207,22 @@ void MainComponent::begin()
     log("-----------------------------------------------------\n", console);
     log("---------------------BEGINNING-----------------------\n", console);
     log("-----------------------------------------------------\n", console);
+    //initialise string objects
+    log("Initialising strings\n", console);
+    for (int i = 0; i < bundles.size(); i++)
+    {
+        swivelStrings.add(new SwivelString());
+        swivelStrings[i]->initialiseFromBundle((bundles)[0]);
+    }
+    log(" Initialising background thread", console);
+    analysisThread = new AnalysisThread(deviceManager, midiOutBox->getSelectedOutput(), &swivelStrings);
+#ifdef DEBUG
+    analysisThread->setConsole(console);
+#endif
+    analysisThread->setFFTParams(fft_size, overlap);
     // BEGIN
-    // SHOULD MOVE THIS TO A BACKGROUND THREAD MAYBE
-    // allocate space for audio
+    // MOVED THIS TO OTHER THREAD
+/*    // allocate space for audio
     log("Allocating shared buffers\n", console);
     audio = (double*) fftw_malloc(sizeof(double)*fft_size);
     log("\t"+String((uint64)sizeof(double)*fft_size) + " bytes allocated for audio\n", console);
@@ -224,27 +232,23 @@ void MainComponent::begin()
     log("Calculating FFT plan\n", console);
     plan = fftw_plan_dft_r2c_1d(fft_size, audio, spectra, FFTW_MEASURE);
     log("Done\n", console);
-    //initialise string objects
-    log("Initialising strings\n", console);
-    for (int i = 0; i < bundles.size(); i++)
-    {
-        swivelStrings.add(new SwivelString(plan, audio, spectra, fft_size, deviceManager->getCurrentAudioDevice()->getCurrentSampleRate(), overlap));
-        swivelStrings[i]->initialiseFromBundle((bundles)[0]);
-    }
     // for each one, do some stuff
     // start listening
     for (int i = 0; i < bundles.size(); i++)
         deviceManager->addAudioCallback(swivelStrings[i]);
+*/
     
+    analysisThread->startThread(0);
     goButton->setButtonText("STOP");
-    reporter->setString(swivelStrings[0]);
+/*    reporter->setString(swivelStrings[0]);
     reporter->setConsole(console);
     reporter->startTimer(700);
     
-    // try out some MIDI
+   // try out some MIDI
     MidiOutput* midi = midiOutBox->getSelectedOutput();
     midi->startBackgroundThread();
     midi->sendBlockOfMessages(*swivelStrings[0]->getMidiBuffer(), Time::getMillisecondCounter()+1000, deviceManager->getCurrentAudioDevice()->getCurrentSampleRate());
+*/
 }
 
 void MainComponent::end()
@@ -252,12 +256,13 @@ void MainComponent::end()
     log("-----------------------------------------------------\n", console);
     log("----------------------STOPPING-----------------------\n", console);
     log("-----------------------------------------------------\n", console);
-    reporter->stopTimer();
+    analysisThread->stopThread(100);
+    /*reporter->stopTimer();
     for (int i = 0; i < swivelStrings.size(); i++)
         deviceManager->removeAudioCallback(swivelStrings[i]);
     goButton->setButtonText("GO");
     MidiOutput* midi = midiOutBox->getSelectedOutput();
-    midi->stopBackgroundThread();
+    midi->stopBackgroundThread();*/
 }
 
 //===============================================================================================

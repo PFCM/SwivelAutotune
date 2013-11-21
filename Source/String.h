@@ -22,7 +22,7 @@
 class SwivelString : public AudioIODeviceCallback
 {
 public:
-    SwivelString(fftw_plan, double* input, fftw_complex* output, int fft_size, double sr, int ol);
+    SwivelString();
     ~SwivelString();
     //===========================================
     void audioDeviceIOCallback(const float** inputChannelData,
@@ -33,6 +33,7 @@ public:
     void audioDeviceAboutToStart(AudioIODevice* device);
     void audioDeviceStopped();
     void initialiseFromBundle(SwivelStringFileParser::StringDataBundle* bundle);
+    void initialiseAudioParameters(fftw_plan, double* input, fftw_complex* output, int fft_size, double sr, int ol);
     
     //===========================================
     /** Returns current list of peaks in Hz */

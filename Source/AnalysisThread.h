@@ -49,6 +49,7 @@ private:
     int overlap;
     int hop_size;
     
+    
     void log(String message);
 };
 

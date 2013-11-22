@@ -92,9 +92,14 @@ MainComponent::MainComponent()
     midiInLabel->setBounds(420, 55, 100, 20);
     midiInBox = new MidiInputDeviceSelector("Midi In Box");
     midiInBox->setBounds(420, 75, 100, 20);
-    midiInBox->addMidiInputCallback(this);
     addAndMakeVisible(midiInLabel);
     addAndMakeVisible(midiInBox);
+    
+    //midi thru
+    midiThroughButton = new TextButton("Start MIDI Thru", "Begins receiving MIDI and sending it through, transforming it if necessary");
+    midiThroughButton->setBounds(2*getWidth()/3-100, 190, 200, 30);
+    midiThroughButton->addListener(this);
+    addAndMakeVisible(midiThroughButton);
     
     //=========================================================================================
     // file chooser button
@@ -107,7 +112,7 @@ MainComponent::MainComponent()
     //=========================================================================================
     // go button
     goButton = new TextButton("GO");
-    goButton->setBounds(getWidth()/2 - 100, 190, 200, 30);
+    goButton->setBounds(getWidth()/3 - 100, 190, 200, 30);
     goButton->addListener(this);
     addAndMakeVisible(goButton);
     
@@ -196,6 +201,19 @@ void MainComponent::buttonClicked(juce::Button *button)
     {
         openFile();
     }
+    else if (midiThroughButton == button)
+    {
+        if (button->getButtonText() == "Start MIDI Thru")
+        {
+            button->setButtonText("Stop MIDI Thru");
+            midiInBox->addMidiInputCallback(this);
+        }
+        else if (button->getButtonText() == "Stop MIDI Thru")
+        {
+            button->setButtonText("Start MIDI Thru");
+            midiInBox->removeMidiInputCallback(this);
+        }
+    }
 }
 
 //===============================================================================================
@@ -208,13 +226,7 @@ void MainComponent::begin()
     log("---------------------BEGINNING-----------------------\n", console);
     log("-----------------------------------------------------\n", console);
     //initialise string objects
-    log("Initialising strings\n", console);
-    for (int i = 0; i < bundles.size(); i++)
-    {
-        swivelStrings.add(new SwivelString());
-        swivelStrings[i]->initialiseFromBundle((bundles)[0]);
-    }
-    log(" Initialising background thread", console);
+    log(" Initialising background thread\n", console);
     analysisThread = new AnalysisThread(deviceManager, midiOutBox->getSelectedOutput(), &swivelStrings);
 #ifdef DEBUG
     analysisThread->setConsole(console);
@@ -256,6 +268,7 @@ void MainComponent::end()
     log("-----------------------------------------------------\n", console);
     log("----------------------STOPPING-----------------------\n", console);
     log("-----------------------------------------------------\n", console);
+    goButton->setButtonText("GO");
     analysisThread->stopThread(100);
     /*reporter->stopTimer();
     for (int i = 0; i < swivelStrings.size(); i++)
@@ -269,9 +282,14 @@ void MainComponent::end()
 void MainComponent::handleIncomingMidiMessage(juce::MidiInput *source, const juce::MidiMessage &message)
 {
     // if we want to print the data to the console, we are going to have to lock the message thread
+#ifdef DEBUG
     const MessageManagerLock mmLock; // should do it
     const uint8* data = message.getRawData();
     log("Received MIDI: " + String(data[0]) + " " + String(data[1]) + " " + String(data[2]) + "\n", console);
+#endif
+    // essentially have to switch on th first byte to tell whether or not we will have to transform
+    
+    midiOutBox->getSelectedOutput()->sendMessageNow(message);
 }
 
 
@@ -312,6 +330,15 @@ void MainComponent::openFile()
             }
             
             bundles.addArray(*data);
+            
+            swivelStrings.clear(true);
+            
+            log("Initialising strings\n", console);
+            for (int i = 0; i < bundles.size(); i++)
+            {
+                swivelStrings.add(new SwivelString());
+                swivelStrings[i]->initialiseFromBundle((bundles)[i]);
+            }
             
         }
         catch (SwivelStringFileParser::ParseException &e)

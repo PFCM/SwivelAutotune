@@ -83,6 +83,8 @@ private:
     ScopedPointer<MidiInputDeviceSelector> midiInBox;
     ScopedPointer<Label> midiInLabel;
     
+    ScopedPointer<TextButton> midiThroughButton;
+    
     // bit of output
     ScopedPointer<TextEditor> console;
     

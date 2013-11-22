@@ -27,7 +27,7 @@ void AnalysisThread::run()
     spectrum = (fftw_complex*) fftw_malloc(sizeof(fftw_complex)*fft_size);
     log("Checking for saved FFT plan\n");
     bool saveWisdom = false;
-    if (!fftw_import_wisdom_from_filename("./fftwisdom"))
+    if (!fftw_import_wisdom_from_filename(("./fftwisdom" + std::to_string(fft_size)).data()))
     {
         saveWisdom = true;
         log("Not found, will save, be patient while generating plan\n");
@@ -40,7 +40,7 @@ void AnalysisThread::run()
     if (saveWisdom)
     {
         log("saving plan for later\n");
-        if(!fftw_export_wisdom_to_filename("./fftwisdom"))
+        if(!fftw_export_wisdom_to_filename(("./fftwisdom" + std::to_string(fft_size)).data()))
             log("failed writing to file\n");
     }
     
@@ -50,12 +50,18 @@ void AnalysisThread::run()
         (*swivelStrings)[i]->initialiseAudioParameters(plan, audio, spectrum, fft_size, deviceManager->getCurrentAudioDevice()->getCurrentSampleRate(), overlap);
         // probably do some MIDI work
         
+        (*swivelStrings)[i]->setAnalysisThread(this);
         deviceManager->addAudioCallback((*swivelStrings)[i]);
         
         // somehow know when it has done its work
-        sleep(2000); // wait for it
-        // maybe use wait and pass the string a ref to this thread to notify when done?
-        
+        if (!wait(15000))
+        {
+            log("Processing timeout expired\n");
+        }
+        else
+        {
+         log("Determined pitch: " + String((*swivelStrings)[i]->getBestFreq()) + "\n");
+        }
         deviceManager->removeAudioCallback((*swivelStrings)[i]);
     }
     

@@ -9,7 +9,6 @@
 #include "SwivelStringFileParser.h"
 #include <regex>
 
-using namespace std;
 
 Array<SwivelStringFileParser::StringDataBundle*>* SwivelStringFileParser::parseFile(const juce::File& f)
 {
@@ -71,12 +70,15 @@ void SwivelStringFileParser::parseSwivelStringElement(juce::BufferedInputStream 
             parseTargets(file, data, tag);
         else if (tag.startsWith("<midimsbs"))
             parseMidiMSBS(file, data, tag);
+        else if (tag.startsWith("<midimessages"))
+            parseMidiMsgs(file, data, tag);
         else
-            fail("expected 'measurements', 'targets' or 'midimsbs' tag, got: " + tag);
+            fail("expected 'measurements', 'targets', 'midimsbs' or 'midimessages' tag, got: " + tag);
         
         tag = file.readNextLine();
     }
     
+    // error checking
     if (data->midi_msbs->size() == 0)
         fail("Did not find any '<midimsbs>");
     if (data->measured_data->size() < 2)
@@ -85,6 +87,8 @@ void SwivelStringFileParser::parseSwivelStringElement(juce::BufferedInputStream 
         fail("Ended up with a different number of 'fundamental' attributes to the number of '<measurements>'");
     if (data->targets->size() == 0)
         fail("Did not find any '<targets>'");
+    if (data->midiBuffer->isEmpty())
+        fail("No '<midimessages>' found, how exactly did you propose to make sound?");
 }
 
 void SwivelStringFileParser::parseMeasurements(juce::BufferedInputStream &file, SwivelStringFileParser::StringDataBundle *data, juce::String tag)
@@ -151,6 +155,37 @@ void SwivelStringFileParser::parseTargets(juce::BufferedInputStream &file, Swive
         fail("expected '</targets>', got: " + line);
 }
 
+void SwivelStringFileParser::parseMidiMsgs(juce::BufferedInputStream &file, SwivelStringFileParser::StringDataBundle *data, juce::String tag)
+{
+    if (!data->midiBuffer->isEmpty())
+        std::cerr << "More than one '<midimessages>' found on a particular string, might want to double check\n";
+    
+    String line = file.readNextLine();
+    line = line.trim();
+    while (line != "</midimessages>")
+    {
+        // actually read the message
+        if (!line.startsWith("<message"))
+            fail("Expected a MIDI message but did not find a tag starting with <message");
+        
+        int tindex = line.indexOf("time");
+        
+        String time = line.substring(tindex+4);
+        time = trimToNumber(time);
+        int timestamp = time.getFloatValue()*44100; // TODO not hardcode the sample rate
+        line = file.readNextLine(); // should be the list of bytes
+        line = line.trim();
+        data->midiBuffer->addEvent(midiMessageFromString(line), timestamp);
+        line = file.readNextLine();
+        line = line.trim();
+        if (!line.equalsIgnoreCase("</message>"))
+            fail("Missing </message> at the end of MIDI message");
+        // advance through the file
+        line = file.readNextLine();
+        line = line.trim();
+    }
+}
+
 //=======================================STRING UTILITIES=======================================================
 
 StringArray SwivelStringFileParser::split(juce::String s, juce::String pattern)
@@ -175,7 +210,7 @@ void SwivelStringFileParser::split_recurse(juce::String s, juce::String& pattern
     }
     
     result.add(s.substring(0, index));
-    split_recurse(s.substring(index+1,s.length()-1), pattern, result);
+    split_recurse(s.substring(index+1,s.length()), pattern, result);
 }
 
 String SwivelStringFileParser::trimToNumber(juce::String &s)
@@ -194,6 +229,19 @@ String SwivelStringFileParser::trimToNumber(juce::String &s)
 bool SwivelStringFileParser::isNotANumber(juce_wchar s)
 {
     return !(CharacterFunctions::isDigit(s));
+}
+
+MidiMessage SwivelStringFileParser::midiMessageFromString(juce::String &info)
+{
+    StringArray data = split(info.trim(), ",");
+    uint8 bytes[4];
+    for (int i  = 0; i < data.size(); i++)
+    {
+        String b = data[i];
+        bytes[i] = (b.getIntValue());
+    }
+    
+    return MidiMessage(bytes, data.size()); // TODO will this work?
 }
 
 //=======================FAIL CODE===============================================================================

@@ -19,11 +19,13 @@
  see examples.
  
  FILE           ::= SWIVELSTRING
- SWIVELSTRING   ::= '<swivelstring ' S NUMATT S '>' S MEASUREMENTS+ S TARGETS S MSBS S '</swivelstring>'
+ SWIVELSTRING   ::= '<swivelstring ' S NUMATT S '>' S MEASUREMENTS+ S TARGETS S MSBS S MIDIMSGS S '</swivelstring>'
  NUMATT         ::= 'number=' NUMBER
  MEASUREMENTS   ::= '<measurements' S FUND S '>' FLOATLIST '</measurement>'
  TARGETS        ::= '<targets>' S FLOATLIST S '</targets>'
  MSBS           ::= '<midimsbs>' BYTELIST '</midimsbs>'
+ MIDIMSGS       ::= '<midimessages>' MMSG+ '</midimessage>'
+ MMSG           ::= '<message' S TIME S '>' BYTELIST '</message>'     // note the list of bytes needs to represent a valid MIDI message
  FLOATLIST      ::= comma separated list of numbers with optional decimal points and fractional parts
  BYTELIST       ::= comma separated list of numbers between 0 and 255
  NUMBER         ::= "[0-9]"
@@ -47,6 +49,8 @@ public:
         ScopedPointer<Array<double>> targets;
         /** The pitch-bend MSBs that should produce these targets */
         ScopedPointer<Array<uint8>> midi_msbs;
+        /** The sequence of MIDI messages needed to make the sounds required */
+        ScopedPointer<MidiBuffer> midiBuffer;
         
         StringDataBundle()
         {
@@ -54,6 +58,7 @@ public:
             fundamentals = new Array<double>();
             targets = new Array<double>();
             midi_msbs = new Array<uint8>();
+            midiBuffer = new MidiBuffer();
         }
     };
     
@@ -77,7 +82,9 @@ private:
     static void parseMeasurements(BufferedInputStream& file, StringDataBundle* data, String tag);
     static void parseTargets(BufferedInputStream& file, StringDataBundle* data, String tag);
     static void parseMidiMSBS(BufferedInputStream& file, StringDataBundle* data, String tag);
+    static void parseMidiMsgs(BufferedInputStream& file, StringDataBundle* data, String tag);
     static void fail(String msg);
+    
     
     // utilities
     /** Splits a string by occurrences of the given pattern.
@@ -89,6 +96,8 @@ private:
     static String trimToNumber(String &s);
     /** Returns true if the character is not a number (including if it is a decimal point */
     static bool isNotANumber(juce_wchar s);
+    /** Will return a MidiMessage from a string containing a (comma separated) list of numbers */
+    static MidiMessage midiMessageFromString(String& info);
     
 };
 

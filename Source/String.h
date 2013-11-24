@@ -47,10 +47,16 @@ public:
     /** Returns the best guess at the end of the analysis stage */
     double getBestFreq();
     
+    /** Gets the length of time to wait before adding this string as an audio callback after starting the MIDI buffer */
+    double getWaitTime();
+    
+    /** Returns true iff both initialisation routines have completed and the final initialisation succeeded */
+    bool isFullyInitialised();
+    
 private:
     //===========================================
     // how to make it go
-    MidiBuffer midiData;
+    ScopedPointer<MidiBuffer> midiData;
     
     //=====INFO OF THE STRING====================
     /** the measured characteristics (2 or more) */
@@ -94,6 +100,8 @@ private:
     bool bundleInit;
     bool audioInit;
     void finalInit();
+    
+    double delay;
     
     Thread* analysisThreadRef;
     

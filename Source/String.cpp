@@ -26,12 +26,6 @@ SwivelString::SwivelString()
     processing = false;
     gate = false;
     lastphase = 0;
-    
-    // for now we will just stuff some dummy data into the midibuffer
-    for (int i = 0; i < 5; i++)
-    {
-        midiData.addEvent(MidiMessage(144, 66, i), i*sample_rate/2);
-    }
 }
 
 SwivelString::~SwivelString()
@@ -47,6 +41,7 @@ void SwivelString::initialiseFromBundle(SwivelStringFileParser::StringDataBundle
     targets = bundle->targets;
     fundamentals = bundle->fundamentals;
     measurements = bundle->measured_data;
+    midiData = bundle->midiBuffer; // for now we hope the sample rates match up
     bundleInit = true;
     
     if (audioInit)
@@ -92,6 +87,24 @@ void SwivelString::finalInit()
     
     minBin = std::max(0, freqToBin(4.0/5.0 * min));
     maxBin = std::min(fft_size-1, freqToBin(6.0/5.0 * max));
+    
+    // figure out the length of the midi buffer to see how long to wait before listening
+    // Currently the idea is that we will start listening at the same time as the second to last midi message
+    //
+    MidiBuffer::Iterator i(*midiData);
+    MidiMessage msg;
+    int samplePos;
+    int time=0;
+    int num=0;
+    int cap = midiData->getNumEvents();
+    while (i.getNextEvent(msg, samplePos))
+    {
+        num++;
+        if (num != cap)
+            time = samplePos; // count up all the messages except the last
+    }
+    // now we are here, convert to ms
+    delay = time / 44.1;
 }
 
 //============================================================
@@ -326,7 +339,7 @@ void SwivelString::window(double *input, int size)
 //================================================================================
 MidiBuffer* SwivelString::getMidiBuffer()
 {
-    return &midiData;
+    return midiData;
 }
 
 void SwivelString::setAnalysisThread(juce::Thread *thread)
@@ -334,4 +347,12 @@ void SwivelString::setAnalysisThread(juce::Thread *thread)
     analysisThreadRef = thread;
 }
 
+bool SwivelString::isFullyInitialised()
+{
+    return bundleInit && audioInit;
+}
 
+double SwivelString::getWaitTime()
+{
+    return delay;
+}

@@ -228,6 +228,7 @@ void MainComponent::begin()
     //initialise string objects
     log(" Initialising background thread\n", console);
     analysisThread = new AnalysisThread(deviceManager, midiOutBox->getSelectedOutput(), &swivelStrings);
+    midiOutBox->getSelectedOutput()->startBackgroundThread();
 #ifdef DEBUG
     analysisThread->setConsole(console);
 #endif
@@ -270,6 +271,7 @@ void MainComponent::end()
     log("-----------------------------------------------------\n", console);
     goButton->setButtonText("GO");
     analysisThread->stopThread(100);
+    midiOutBox->getSelectedOutput()->stopBackgroundThread();
     /*reporter->stopTimer();
     for (int i = 0; i < swivelStrings.size(); i++)
         deviceManager->removeAudioCallback(swivelStrings[i]);
@@ -316,17 +318,24 @@ void MainComponent::openFile()
                 cout << "Check data, string number: " << bundle->num << endl;
                 for (int i  = 0; i < bundle->fundamentals->size(); i++)
                 {
-                    cout << "\tFundamental: " << (*bundle->fundamentals)[i] << endl;
+                    cout << " | Fundamental: " << (*bundle->fundamentals)[i] << endl;
                     for (int j = 0; j < (*bundle->measured_data)[i]->size(); j++)
-                        cout << "\t\t" << (*(*bundle->measured_data)[i])[j] << endl;
+                        cout << " | | " << (*(*bundle->measured_data)[i])[j] << endl;
                 }
-                cout << "\tTargets\n";
+                cout << " | Targets\n";
                 for (int i = 0; i < bundle->targets->size(); i++)
-                    cout << "\t\t" << (*bundle->targets)[i] << endl;
+                    cout << " | | " << (*bundle->targets)[i] << endl;
                 
-                cout << "\tMidi MSBS\n";
+                cout << " | Midi MSBS\n";
                 for (int i = 0; i < bundle->midi_msbs->size(); i++)
-                    cout << "\t\t" << (int)(*bundle->midi_msbs)[i] <<endl;
+                    cout << " | | " << (int)(*bundle->midi_msbs)[i] <<endl;
+                
+                cout << " | Midi Messages\n";
+                MidiMessage msg;
+                int sampleoffset;
+                MidiBuffer::Iterator it(*bundle->midiBuffer);
+                while (it.getNextEvent(msg, sampleoffset))
+                    cout << " | | " << (int)msg.getRawData()[0] << "," << (int)msg.getRawData()[1] << "," << (int)msg.getRawData()[2] << "\tTime: " << sampleoffset << endl;
             }
             
             bundles.addArray(*data);
@@ -341,7 +350,7 @@ void MainComponent::openFile()
             }
             
         }
-        catch (SwivelStringFileParser::ParseException &e)
+        catch (SwivelStringFileParser::ParseException const &e)
         {
             log(String("Parse Error: ") + e.what()  + "\n", console);
         }

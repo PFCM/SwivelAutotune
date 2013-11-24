@@ -46,14 +46,27 @@ void AnalysisThread::run()
     
     for (int i = 0; i < swivelStrings->size(); i++) // for each string
     {
+        SwivelString* current = (*swivelStrings)[i];
         // make sure they're good to go on the audio front
-        (*swivelStrings)[i]->initialiseAudioParameters(plan, audio, spectrum, fft_size, deviceManager->getCurrentAudioDevice()->getCurrentSampleRate(), overlap);
-        // probably do some MIDI work
+        current->initialiseAudioParameters(plan, audio, spectrum, fft_size, deviceManager->getCurrentAudioDevice()->getCurrentSampleRate(), overlap);
+        // make sure we're good to go
+        if (!current->isFullyInitialised())
+        {
+            log("ERROR: string not fully initialised\n");
+            break;
+        }
         
-        (*swivelStrings)[i]->setAnalysisThread(this);
-        deviceManager->addAudioCallback((*swivelStrings)[i]);
-        // send final midi message
-        midiOut->sendMessageNow(MidiMessage(144,66,66));
+        // send the midi
+        log("Sending MIDI\n");
+        midiOut->sendBlockOfMessages(*current->getMidiBuffer(), Time::getMillisecondCounter()+1000, 44100);
+        log("Midi begun, waiting: " + String(current->getWaitTime()+1000) + "ms\n");
+        
+        current->setAnalysisThread(this); // all ready to go
+        
+        // wait the specified time
+        wait(current->getWaitTime()+1000);
+        log("Starting listening\n");
+        deviceManager->addAudioCallback(current);
         
         // somehow know when it has done its work
         if (!wait(15000))
@@ -62,9 +75,11 @@ void AnalysisThread::run()
         }
         else
         {
-         log("Determined pitch: " + String((*swivelStrings)[i]->getBestFreq()) + "\n");
+         log("Determined pitch: " + String(current->getBestFreq()) + "\n");
         }
-        deviceManager->removeAudioCallback((*swivelStrings)[i]);
+        
+        //tidy up
+        deviceManager->removeAudioCallback(current);
     }
     
     free(audio);

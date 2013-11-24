@@ -15,10 +15,10 @@
 		113,103,93,83,73,63,53,43,33,23,13,3
     </midimsbs>
     <midimessages>
-        <message time="10">
+        <message time="2">
             178,1,66
         </message>
-        <message time="12">
+        <message time="3">
             144,66,66
         </message>
     </midimessages>

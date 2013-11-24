@@ -58,6 +58,23 @@ void AnalysisThread::run()
         
         // send the midi
         log("Sending MIDI\n");
+        
+        /*trying to find the problem
+        MidiBuffer m = *current->getMidiBuffer();
+        bool b = m.isEmpty();
+        const uint8* bytes;
+        int offset;
+        int num;
+        MidiBuffer::Iterator it(m);
+        while (it.getNextEvent(bytes, num, offset))
+        {
+            for (int g = 0; g < 3; g++)
+            {
+                int x = bytes[g];
+                int y = 3;
+            }
+        }*/
+        
         midiOut->sendBlockOfMessages(*current->getMidiBuffer(), Time::getMillisecondCounter()+1000, 44100);
         log("Midi begun, waiting: " + String(current->getWaitTime()+1000) + "ms\n");
         

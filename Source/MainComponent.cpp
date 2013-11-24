@@ -291,7 +291,7 @@ void MainComponent::handleIncomingMidiMessage(juce::MidiInput *source, const juc
 #endif
     // essentially have to switch on th first byte to tell whether or not we will have to transform
     
-    midiOutBox->getSelectedOutput()->sendMessageNow(message);
+    //midiOutBox->getSelectedOutput()->sendMessageNow(message);
 }
 
 

@@ -339,7 +339,7 @@ void SwivelString::window(double *input, int size)
 //================================================================================
 MidiBuffer* SwivelString::getMidiBuffer()
 {
-    return midiData;
+    return midiData.get(); // return it without messing with the scope and whatnot
 }
 
 void SwivelString::setAnalysisThread(juce::Thread *thread)

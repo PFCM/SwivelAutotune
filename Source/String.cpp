@@ -105,13 +105,13 @@ void SwivelString::audioDeviceIOCallback(const float **inputChannelData,
     float RMS =0;
     vDSP_rmsqv(inputChannelData[0], 1, &RMS, numSamples);
     //std::cout << RMS <<std::endl;
-    if (RMS >= 0.15 && gate == false)
+    if (RMS >= 0.01 && gate == false)
     {
         processing = true;
         gate = true;
         std::cout << "bang" <<std::endl;
     }
-    if (freqs.size() >= 20 || (RMS <= 0.1 && gate == true))
+    if (freqs.size() >= 20 || (RMS <= 0.01 && gate == true))
     {
         processing = false;
         gate = false;
@@ -127,7 +127,7 @@ void SwivelString::audioDeviceIOCallback(const float **inputChannelData,
         double total = 0;
         for (int i = 0; i < freqs.size(); i++)
         {
-            if (freqs[i] != NAN)
+            if (!std::isnan(freqs[i]))
                 total += freqs[i];
             else
                 ++nancount;

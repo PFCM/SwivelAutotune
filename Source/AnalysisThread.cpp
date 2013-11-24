@@ -52,6 +52,8 @@ void AnalysisThread::run()
         
         (*swivelStrings)[i]->setAnalysisThread(this);
         deviceManager->addAudioCallback((*swivelStrings)[i]);
+        // send final midi message
+        midiOut->sendMessageNow(MidiMessage(144,66,66));
         
         // somehow know when it has done its work
         if (!wait(15000))

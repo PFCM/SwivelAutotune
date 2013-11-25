@@ -51,6 +51,7 @@ private:
     
     
     void log(String message);
+    void exitThread();
 };
 
 #endif /* defined(__SwivelAutotune__AnalysisThread__) */

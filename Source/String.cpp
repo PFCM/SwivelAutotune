@@ -38,11 +38,12 @@ SwivelString::~SwivelString()
 // initialises from parsed data
 void SwivelString::initialiseFromBundle(SwivelStringFileParser::StringDataBundle* bundle)
 {
-    midiMsbs = bundle->midi_msbs;
+    midiPitchBend = bundle->midi_pitchbend;
     targets = bundle->targets;
     fundamentals = bundle->fundamentals;
     measurements = bundle->measured_data;
     midiData = bundle->midiBuffer; // for now we hope the sample rates match up
+    this->num = bundle->num;
     
     // figure out channel from the first MIDI message
     MidiBuffer::Iterator it(*midiData);
@@ -191,7 +192,7 @@ void SwivelString::audioDeviceIOCallback(const float **inputChannelData,
         // now use c to fill in a lookup table of the extrapolated characteristics of the current tuning
         Array<double> low = *(*measurements)[below];
         Array<double> high = *(*measurements)[above]; // stupid asterisks are silly
-        for (int i = 0; low.size(); i++)
+        for (int i = 0; i < low.size(); i++)
         {
             // just to check let's lay these out for now
             double l = low[i];
@@ -204,9 +205,44 @@ void SwivelString::audioDeviceIOCallback(const float **inputChannelData,
         
         // now we can try to construct a table of pitch bend values for virtual frets
         // to which we can quantise incoming notes
-        // TODO what to do with oopen strings?
         // TODO how to extrapolate?
         // TODO something better than linear interpolation for steps along the string
+        
+        // start by going through each target
+        int dIndex=0;
+        int number = num;
+        // we are going to make a two octave lookup table of pitch bend values by note numbers
+        
+        for (int i = 0; i < targets->size(); i++,number++)
+        {
+            if ((*targets)[i] < determined_pitch || (*targets)[i] > derived_data[derived_data.size()-1]) // we can't do much with values lower than the open string
+                note_key_table.set(number, INVALID_NOTE);
+            else // must be greater than or equal to determined_pitch
+            {
+                double target = (*targets)[i];
+                while (target >= derived_data[dIndex])
+                    dIndex++;
+                // issue here with the derived data being smaller than targets
+                // will do some fancy extrapolation
+                // but for now we will fill in those values with INVALID_NOTES
+                double a = derived_data[dIndex] - derived_data[dIndex-1];
+                double b = 0;
+                if (dIndex == 0)
+                    b = determined_pitch - derived_data[dIndex-1];
+                else
+                    b = target - derived_data[dIndex-1];
+                double c = b/a;
+                int start = (*midiPitchBend)[dIndex];
+                int end   = 0;
+                if (dIndex == 0)
+                    end = 127;
+                else
+                    end = (*midiPitchBend)[dIndex-1];
+                
+                note_key_table.set(number, end + (start-end)*c);
+            }
+        }
+        
         
         analysisThreadRef->notify(); // let's get out of here
     }
@@ -327,7 +363,7 @@ void SwivelString::audioDeviceStopped()
 
 //===============================================================================
 /** Returns the current peaks */
-Array<double>* SwivelString::getCurrentPeaksAsFrequencies()
+Array<double>* SwivelString::getCurrentPeaksAsFrequencies() const
 {
     static Array<double>* peaksHz = new Array<double>();
     peaksHz->clear();
@@ -341,7 +377,7 @@ Array<double>* SwivelString::getCurrentPeaksAsFrequencies()
 }
 
 /** returns the best guess */
-double SwivelString::getBestFreq()
+double SwivelString::getBestFreq() const
 {
     return determined_pitch;
 }
@@ -398,7 +434,7 @@ void SwivelString::window(double *input, int size)
 }
 
 //================================================================================
-MidiBuffer* SwivelString::getMidiBuffer()
+MidiBuffer* SwivelString::getMidiBuffer() const
 {
     return midiData.get(); // return it without messing with the scope and whatnot
 }
@@ -408,22 +444,22 @@ void SwivelString::setAnalysisThread(juce::Thread *thread)
     analysisThreadRef = thread;
 }
 
-bool SwivelString::isFullyInitialised()
+bool SwivelString::isFullyInitialised() const
 {
     return bundleInit && audioInit;
 }
 
-double SwivelString::getWaitTime()
+double SwivelString::getWaitTime() const
 {
     return delay;
 }
 
-int SwivelString::getMidiChannel()
+int SwivelString::getMidiChannel() const
 {
     return channel;
 }
 
-bool SwivelString::isReadyToTransform()
+bool SwivelString::isReadyToTransform() const
 {
     return bundleInit && audioInit && (std::isnormal(determined_pitch));
 }
@@ -431,21 +467,44 @@ bool SwivelString::isReadyToTransform()
 //===============================================================================
 // Arguably the most important
 
-MidiMessage SwivelString::transform(juce::MidiMessage &msg)
+MidiMessage SwivelString::transform(const juce::MidiMessage &msg) const
 {
     const uint8* data = msg.getRawData();
 #ifdef DEBUG // do some double checking
     if (msg.getChannel() != channel)
-        throw std::logic_error("String on channel: " + std::to_string(channel) + " cannot transform message on channel: " + std::to_string(msg.getChannel()));
+        throw std::logic_error("String on channel: " + std::to_string(channel) + " being asked to transform message on channel: "
+                               + std::to_string(msg.getChannel()));
+    if (msg.isNoteOn() && (msg.getNoteNumber() < num || msg.getNoteNumber() > num+24))
+        throw std::logic_error("String on channel: " +
+                               std::to_string(channel) +
+                               "given note number: " +
+                               std::to_string(msg.getNoteNumber()) +
+                               "which is outside operating range of" +
+                               std::to_string(num) + "--" + std::to_string(num+24));
 #endif
-    if ((data[0] & 0xf0) != 176) return msg; // if it is anything but a pitchbend, just pass it straight through
+    // get status half of the first byte
+    uint8 status = data[0] & 0xf0;
+    if (!(status == 176 || status == 144)) return msg; // if it is anything but a pitchbend or a noteon, just pass it straight through
     
     // otherwise transform it
     // get the pitch bend number
-    int pitchIn = (data[2] << 7) | data[1]; // comes in LSB first?
+    if (status == 176)
+    {
+        int pitchIn = (data[2] << 7) | data[1]; // comes in LSB first?
+        
+        // this needs to scale the pitch bend to the actual pitch bend values that would produce
+        // a couple of semitones of deviation.
+        // Perhaps this could be controlled with a cc message, will check GM spec.
+    }
+    else if (status == 144) // note on, move to a calculated position
+    {
+        // grab pitch bend value for the note, velocity currently ignored, could be mapped to note pressure or something like that
+        uint16 pbv = note_key_table[data[1]];
+        uint8 d1 = pbv & 0x7f; // LSB
+        uint8 d2 = (pbv >> 7) & 0x7f; // MSB
+        
+        return MidiMessage(176+channel-1, d1, d2);
+    }
     
-    // using derived_data and the MSBS we can guess what frequency this might produce
-    // from there
-    
-    return MidiMessage();
+    return MidiMessage(); // default exit point does nothing just makes sure it compiles
 }

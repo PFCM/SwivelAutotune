@@ -79,7 +79,7 @@ void SwivelStringFileParser::parseSwivelStringElement(juce::BufferedInputStream 
     }
     
     // error checking
-    if (data->midi_msbs->size() == 0)
+    if (data->midi_pitchbend->size() == 0)
         fail("Did not find any '<midimsbs>");
     if (data->measured_data->size() < 2)
         fail("Need at least two '<measurements>' to work, found " + String(data->measured_data->size()));
@@ -124,7 +124,7 @@ void SwivelStringFileParser::parseMeasurements(juce::BufferedInputStream &file, 
 
 void SwivelStringFileParser::parseMidiMSBS(juce::BufferedInputStream &file, SwivelStringFileParser::StringDataBundle *data, juce::String tag)
 {
-    if (data->midi_msbs->size() != 0) fail("probably more than one <midimsbs> tag in the file");
+    if (data->midi_pitchbend->size() != 0) fail("probably more than one <midimsbs> tag in the file");
     String line = file.readNextLine();
     StringArray splitLine = split(line, ",");
     
@@ -132,7 +132,7 @@ void SwivelStringFileParser::parseMidiMSBS(juce::BufferedInputStream &file, Swiv
     // IF THE NUMBERS ARE MISSING COMMAS OR TOO LARGE ETC, THEY
     // WILL JUST WRAP AROUND 255, MIGHT BE TOUGH TO SPOT
     for (int i = 0; i < splitLine.size(); i++)
-        data->midi_msbs->add((uint8)splitLine[i].getIntValue());
+        data->midi_pitchbend->add((uint16)(splitLine[i].getIntValue()<<7));
     
     line = file.readNextLine();
     line = line.trim();

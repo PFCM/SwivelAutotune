@@ -1,4 +1,4 @@
-<swivelstring number=“1”>
+<swivelstring number=“45”>
 	<measurements fundamental=“113”>
 		129.1992,142.6575,152.6575,164.1907,177.6489,191.1072,207.2571,226.0986,250.3235,277.24,322.998,382.2144
 	</measurements>
@@ -16,7 +16,7 @@
     </midimsbs>
     <midimessages>
         <message time="2">
-            178,1,66
+            176,1,66
         </message>
         <message time="3">
             144,66,66

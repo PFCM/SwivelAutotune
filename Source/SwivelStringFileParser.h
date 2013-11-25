@@ -48,7 +48,7 @@ public:
         /** The target frequencies */
         ScopedPointer<Array<double>> targets;
         /** The pitch-bend MSBs that should produce these targets */
-        ScopedPointer<Array<uint8>> midi_msbs;
+        ScopedPointer<Array<uint16>> midi_pitchbend;
         /** The sequence of MIDI messages needed to make the sounds required */
         ScopedPointer<MidiBuffer> midiBuffer;
         
@@ -57,7 +57,7 @@ public:
             measured_data = new OwnedArray<Array<double>>();
             fundamentals = new Array<double>();
             targets = new Array<double>();
-            midi_msbs = new Array<uint8>();
+            midi_pitchbend = new Array<uint16>();
             midiBuffer = new MidiBuffer();
         }
     };

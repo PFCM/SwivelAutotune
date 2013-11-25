@@ -289,8 +289,18 @@ void MainComponent::handleIncomingMidiMessage(juce::MidiInput *source, const juc
     const uint8* data = message.getRawData();
     log("Received MIDI: " + String(data[0]) + " " + String(data[1]) + " " + String(data[2]) + "\n", console);
 #endif
-    // essentially have to switch on th first byte to tell whether or not we will have to transform
+    // essentially have to switch on the channel to pass it to the right string
+    // would make sense to have a map of strings by channel
+    // as this is potentially a bottleneck
+    // depending how much midi we are piping through
     
+    // for now the ugly linear version
+    if (!analysisThread->isThreadRunning())
+        for (int i = 0; i < swivelStrings.size(); i++)
+        {
+            if (swivelStrings[i]->getMidiChannel() == message.getChannel())
+                midiOutBox->getSelectedOutput()->sendMessageNow(swivelStrings[i]->transform(message));
+        }
     //midiOutBox->getSelectedOutput()->sendMessageNow(message);
 }
 
@@ -326,9 +336,9 @@ void MainComponent::openFile()
                 for (int i = 0; i < bundle->targets->size(); i++)
                     cout << " | | " << (*bundle->targets)[i] << endl;
                 
-                cout << " | Midi MSBS\n";
-                for (int i = 0; i < bundle->midi_msbs->size(); i++)
-                    cout << " | | " << (int)(*bundle->midi_msbs)[i] <<endl;
+                cout << " | Midi Pitchbend (14bit)\n";
+                for (int i = 0; i < bundle->midi_pitchbend->size(); i++)
+                    cout << " | | " << (int)(*bundle->midi_pitchbend)[i] <<endl;
                 
                 cout << " | Midi Messages\n";
                 MidiMessage msg;

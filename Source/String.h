@@ -39,31 +39,31 @@ public:
     
     //===========================================
     /** Returns current list of peaks in Hz */
-    Array<double>* getCurrentPeaksAsFrequencies();
+    Array<double>* getCurrentPeaksAsFrequencies() const;
     /** Returns the midi data required to make things go */
-    MidiBuffer* getMidiBuffer();
+    MidiBuffer* getMidiBuffer() const;
     
     /** Set the thread to notify when processing is complete */
     void setAnalysisThread(Thread* thread);
     
     /** Returns the best guess at the end of the analysis stage */
-    double getBestFreq();
+    double getBestFreq() const;
     
     /** Gets the length of time to wait before adding this string as an audio callback after starting the MIDI buffer */
-    double getWaitTime();
+    double getWaitTime() const;
     
     /** Returns true iff both initialisation routines have completed and the final initialisation succeeded */
-    bool isFullyInitialised();
+    bool isFullyInitialised() const;
     
     //============================================
     // MIDI transformation functions
     /** Transforms MIDI if it is for this string and this string is in a state where it is happy to do it */
-    MidiMessage transform(MidiMessage &msg);
+    MidiMessage transform(const MidiMessage &msg) const;
     /** Returns true if this string has been initialised and done sufficient processing to want to work on MIDI */
-    bool isReadyToTransform();
+    bool isReadyToTransform() const;
     /** Gets the MIDI channel this string is working on, this is derived from the given MIDI data in the data file used to construct 
         the string */
-    int getMidiChannel();
+    int getMidiChannel() const;
     
 private:
     //===========================================
@@ -81,7 +81,7 @@ private:
     /** The midi pitchbend values (msb only) that created the 
      *  characterisation tables, essentially the values which
      *  we want to produce the target frequencies             */
-    ScopedPointer<Array<uint8>> midiMsbs;
+    ScopedPointer<Array<uint16>> midiPitchBend;
     
     //=====FFT STUFF=============================
     bool processing;
@@ -122,14 +122,19 @@ private:
     double determined_pitch;
     
     // some constants to save time
-    static constexpr double ONEDIVPI = 1.0/M_PI;
-    static constexpr double HALFPI   = 0.5*M_PI;
+    static constexpr double ONEDIVPI     = 1.0/M_PI;
+    static constexpr double HALFPI       = 0.5*M_PI;
+    static constexpr uint8  INVALID_NOTE = 0xff; // could be anything > 127
     
     //===============================================
     // some MIDI info
     int channel;
     // the lookup table, derived from the measurements and the audio analysis
     Array<double> derived_data;
+    // the lookup table of notes to pitchbend values
+    HashMap<uint8, uint16> note_key_table;
+    // beginning number
+    int num;
 };
 
 #endif /* defined(__SwivelAutotune__String__) */

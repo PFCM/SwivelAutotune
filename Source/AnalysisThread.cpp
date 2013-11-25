@@ -75,8 +75,8 @@ void AnalysisThread::run()
             }
         }*/
         
-        midiOut->sendBlockOfMessages(*current->getMidiBuffer(), Time::getMillisecondCounter()+1000, 44100);
-        log("Midi begun, waiting: " + String(current->getWaitTime()+1000) + "ms\n");
+        midiOut->sendBlockOfMessages(*current->getMidiBuffer(), Time::getMillisecondCounter()+100, 44100);
+        log("Midi begun, waiting: " + String(current->getWaitTime()+100) + "ms\n");
         
         current->setAnalysisThread(this); // all ready to go
         
@@ -86,7 +86,7 @@ void AnalysisThread::run()
         deviceManager->addAudioCallback(current);
         
         // somehow know when it has done its work
-        if (!wait(15000))
+        if (!wait(150000))
         {
             log("Processing timeout expired\n");
         }
@@ -97,10 +97,22 @@ void AnalysisThread::run()
         
         //tidy up
         deviceManager->removeAudioCallback(current);
+        
+        if (threadShouldExit())
+        {
+            break;
+        }
     }
-    
-    free(audio);
-    free(spectrum);
+    // and exit gracefully
+    exitThread();
+}
+
+void AnalysisThread::exitThread()
+{
+    if (audio != nullptr)
+        free(audio);
+    if (spectrum != nullptr)
+        free(spectrum);
 }
 
 

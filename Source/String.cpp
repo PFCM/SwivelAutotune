@@ -492,6 +492,8 @@ void SwivelString::reset()
 
 MidiMessage SwivelString::transform(const juce::MidiMessage &msg) const
 {
+    static uint8 current_note;
+    
     const uint8* data = msg.getRawData();
 #ifdef DEBUG // do some double checking
     if (msg.getChannel() != channel)
@@ -518,6 +520,50 @@ MidiMessage SwivelString::transform(const juce::MidiMessage &msg) const
         // this needs to scale the pitch bend to the actual pitch bend values that would produce
         // a couple of semitones of deviation.
         // Perhaps this could be controlled with a cc message, will check GM spec.
+        
+        // for now lets set it at 2 semitones
+        // we have a 14 bit value coming in
+        // we want a total range of ±2 semitones from current_note
+        // ideally this should move linearly in perceived pitch space (ie midi note number space)
+        // for now it won't quite
+        // range of input is 0-16384 (0-2^14)
+        // we can divide into 4 sections of 4096 for each semitone and interpolate appropriately for each
+        // TODO propoerly deal with notes outside the range in note_key_table
+        uint16 target = 0;
+        uint16 start = 0;
+        double c = 0;
+        if (pitchIn >= 12288) // and < 16384
+        {
+            // determine interpolation constant
+            c = (pitchIn-12288)/4096.0;
+            target = note_key_table[current_note+2];
+            start = note_key_table[current_note+1];
+        }
+        else if (pitchIn >= 8192) // and < 12288
+        {
+            c = (pitchIn-8192)/4096.0;
+            target = note_key_table[current_note+1];
+            start = note_key_table[current_note];
+        }
+        else if (pitchIn >= 4096) // and < 8192
+        {
+            c = (pitchIn-4096)/4096.0;
+            target = note_key_table[current_note-1];
+            start  = note_key_table[current_note];
+        }
+        else // pitchIn > 0 && pitchIn < 4096
+        {
+            c = pitchIn/4096.0;
+            target = note_key_table[current_note-2];
+            start = note_key_table[current_note-1];
+        }
+        
+        uint16 val = start + (start-target)*c;
+        // now pack into a midi message
+        uint8 d1 = val & 0x7f;
+        uint8 d2 = (val >> 7) & 0x7f;
+        
+        return MidiMessage(176+channel-1, d1, d2);
     }
     else if (status == 144) // note on, move to a calculated position
     {
@@ -526,6 +572,8 @@ MidiMessage SwivelString::transform(const juce::MidiMessage &msg) const
         if (pbv == INVALID_NOTE) return MidiMessage();
         uint8 d1 = pbv & 0x7f; // LSB
         uint8 d2 = (pbv >> 7) & 0x7f; // MSB
+        
+        current_note = data[1]; // store for calculating pitch bend
         
         return MidiMessage(176+channel-1, d1, d2);
     }

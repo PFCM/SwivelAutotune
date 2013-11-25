@@ -39,9 +39,9 @@ public:
     
     //===========================================
     /** Returns current list of peaks in Hz */
-    Array<double>* getCurrentPeaksAsFrequencies() const;
+    const Array<double>* getCurrentPeaksAsFrequencies() const;
     /** Returns the midi data required to make things go */
-    MidiBuffer* getMidiBuffer() const;
+    const MidiBuffer* getMidiBuffer() const;
     
     /** Set the thread to notify when processing is complete */
     void setAnalysisThread(Thread* thread);

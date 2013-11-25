@@ -363,7 +363,7 @@ void SwivelString::audioDeviceStopped()
 
 //===============================================================================
 /** Returns the current peaks */
-Array<double>* SwivelString::getCurrentPeaksAsFrequencies() const
+const Array<double>* SwivelString::getCurrentPeaksAsFrequencies() const
 {
     static Array<double>* peaksHz = new Array<double>();
     peaksHz->clear();
@@ -434,7 +434,7 @@ void SwivelString::window(double *input, int size)
 }
 
 //================================================================================
-MidiBuffer* SwivelString::getMidiBuffer() const
+const MidiBuffer* SwivelString::getMidiBuffer() const
 {
     return midiData.get(); // return it without messing with the scope and whatnot
 }
@@ -479,7 +479,7 @@ MidiMessage SwivelString::transform(const juce::MidiMessage &msg) const
                                std::to_string(channel) +
                                "given note number: " +
                                std::to_string(msg.getNoteNumber()) +
-                               "which is outside operating range of" +
+                               " which is outside operating range of" +
                                std::to_string(num) + "--" + std::to_string(num+24));
 #endif
     // get status half of the first byte
@@ -498,8 +498,9 @@ MidiMessage SwivelString::transform(const juce::MidiMessage &msg) const
     }
     else if (status == 144) // note on, move to a calculated position
     {
-        // grab pitch bend value for the note, velocity currently ignored, could be mapped to note pressure or something like that
+        // grab pitch bend value for the note, velocity currently ignored, could be mapped to pressure or something 
         uint16 pbv = note_key_table[data[1]];
+        if (pbv == INVALID_NOTE) return MidiMessage();
         uint8 d1 = pbv & 0x7f; // LSB
         uint8 d2 = (pbv >> 7) & 0x7f; // MSB
         

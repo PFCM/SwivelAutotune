@@ -288,12 +288,12 @@ void MainComponent::handleIncomingMidiMessage(juce::MidiInput *source, const juc
     const MessageManagerLock mmLock; // should do it
     const uint8* data = message.getRawData();
     log("Received MIDI: " + String(data[0]) + " " + String(data[1]) + " " + String(data[2]) + "\n", console);
+    try {
 #endif
     // essentially have to switch on the channel to pass it to the right string
     // would make sense to have a map of strings by channel
     // as this is potentially a bottleneck
     // depending how much midi we are piping through
-    
     // for now the ugly linear version
     if (!analysisThread->isThreadRunning())
         for (int i = 0; i < swivelStrings.size(); i++)
@@ -302,6 +302,12 @@ void MainComponent::handleIncomingMidiMessage(juce::MidiInput *source, const juc
                 midiOutBox->getSelectedOutput()->sendMessageNow(swivelStrings[i]->transform(message));
         }
     //midiOutBox->getSelectedOutput()->sendMessageNow(message);
+        
+#ifdef DEBUG
+    } catch (std::logic_error const &e) {
+        std::cerr << e.what();
+    }
+#endif
 }
 
 
@@ -401,6 +407,6 @@ void MainComponent::Reporter::setString(SwivelString *str)
 void MainComponent::Reporter::timerCallback()
 {
     int peak_index = 1;
-    Array<double>* peaksPtr = swString->getCurrentPeaksAsFrequencies();
+    const Array<double>* peaksPtr = swString->getCurrentPeaksAsFrequencies();
     log("lowest: " + String((*peaksPtr)[peak_index]) + "\n", console);
 }

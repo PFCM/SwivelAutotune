@@ -31,8 +31,10 @@ SwivelString::SwivelString()
 
 SwivelString::~SwivelString()
 {
-    free(magnitudes);
-    free(input_buffer);
+    if (magnitudes == nullptr)
+        free(magnitudes);
+    if (input_buffer == nullptr)
+        free(input_buffer);
 }
 
 // initialises from parsed data
@@ -464,6 +466,27 @@ bool SwivelString::isReadyToTransform() const
     return bundleInit && audioInit && (std::isnormal(determined_pitch));
 }
 
+void SwivelString::reset()
+{
+    // undo calculations
+    derived_data.clear();
+    determined_pitch = std::numeric_limits<double>::signaling_NaN();
+    processing = false;
+    gate = false;
+    peaks.clear();
+    freqs.clear();
+    analysisThreadRef = nullptr;
+    note_key_table.clear();
+    lastphase = 0;
+    // undo audio init
+    free(input_buffer);
+    free(magnitudes);
+    input_buffer = nullptr;
+    magnitudes = nullptr;
+    audioInit = false;
+    
+}
+
 //===============================================================================
 // Arguably the most important
 
@@ -477,7 +500,7 @@ MidiMessage SwivelString::transform(const juce::MidiMessage &msg) const
     if (msg.isNoteOn() && (msg.getNoteNumber() < num || msg.getNoteNumber() > num+24))
         throw std::logic_error("String on channel: " +
                                std::to_string(channel) +
-                               "given note number: " +
+                               " given note number: " +
                                std::to_string(msg.getNoteNumber()) +
                                " which is outside operating range of" +
                                std::to_string(num) + "--" + std::to_string(num+24));
@@ -498,7 +521,7 @@ MidiMessage SwivelString::transform(const juce::MidiMessage &msg) const
     }
     else if (status == 144) // note on, move to a calculated position
     {
-        // grab pitch bend value for the note, velocity currently ignored, could be mapped to pressure or something 
+        // grab pitch bend value for the note, velocity currently ignored, could be mapped to pressure or something
         uint16 pbv = note_key_table[data[1]];
         if (pbv == INVALID_NOTE) return MidiMessage();
         uint8 d1 = pbv & 0x7f; // LSB

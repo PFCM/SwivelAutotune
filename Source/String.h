@@ -65,6 +65,11 @@ public:
         the string */
     int getMidiChannel() const;
     
+    //===========================================
+    /** Resets all calculated data in preparation for recalculation.
+        This keeps the bundle initialisation but resets the audio information.*/
+    void reset();
+    
 private:
     //===========================================
     // how to make it go
@@ -78,7 +83,7 @@ private:
     ScopedPointer<Array<double>> fundamentals;
     /** The desired frequencies per ``fret'' */
     ScopedPointer<Array<double>> targets;
-    /** The midi pitchbend values (msb only) that created the 
+    /** The midi pitchbend values that created the 
      *  characterisation tables, essentially the values which
      *  we want to produce the target frequencies             */
     ScopedPointer<Array<uint16>> midiPitchBend;

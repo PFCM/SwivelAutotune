@@ -9,7 +9,7 @@
 #include "AnalysisThread.h"
 
 AnalysisThread::AnalysisThread(AudioDeviceManager *manager, MidiOutput *mout, OwnedArray<SwivelString, CriticalSection> *strings)
-: Thread("Analysis Thread"), deviceManager(manager), midiOut(mout), swivelStrings(strings), console(nullptr)
+: Thread("Analysis Thread"), deviceManager(manager), midiOut(mout), swivelStrings(strings), console(nullptr), audio(nullptr), spectrum(nullptr)
 {
     
 }

@@ -8,6 +8,8 @@
 /**
     Represents a single string. Implements juce::AudioIODeviceCallback, so in order to do its calculations it must be
     added as a callback to the current audio device.
+    Each string has a separate midi channel, and once it has done its 
+    analysis can be passed midi messages to transform them according to the results.
 */
 
 #ifndef __SwivelAutotune__String__
@@ -52,6 +54,16 @@ public:
     
     /** Returns true iff both initialisation routines have completed and the final initialisation succeeded */
     bool isFullyInitialised();
+    
+    //============================================
+    // MIDI transformation functions
+    /** Transforms MIDI if it is for this string and this string is in a state where it is happy to do it */
+    MidiMessage transform(MidiMessage &msg);
+    /** Returns true if this string has been initialised and done sufficient processing to want to work on MIDI */
+    bool isReadyToTransform();
+    /** Gets the MIDI channel this string is working on, this is derived from the given MIDI data in the data file used to construct 
+        the string */
+    int getMidiChannel();
     
 private:
     //===========================================
@@ -112,6 +124,12 @@ private:
     // some constants to save time
     static constexpr double ONEDIVPI = 1.0/M_PI;
     static constexpr double HALFPI   = 0.5*M_PI;
+    
+    //===============================================
+    // some MIDI info
+    int channel;
+    // the lookup table, derived from the measurements and the audio analysis
+    Array<double> derived_data;
 };
 
 #endif /* defined(__SwivelAutotune__String__) */

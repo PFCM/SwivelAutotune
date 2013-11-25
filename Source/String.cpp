@@ -26,6 +26,7 @@ SwivelString::SwivelString()
     processing = false;
     gate = false;
     lastphase = 0;
+    determined_pitch = std::numeric_limits<double>::signaling_NaN();
 }
 
 SwivelString::~SwivelString()
@@ -42,6 +43,14 @@ void SwivelString::initialiseFromBundle(SwivelStringFileParser::StringDataBundle
     fundamentals = bundle->fundamentals;
     measurements = bundle->measured_data;
     midiData = bundle->midiBuffer; // for now we hope the sample rates match up
+    
+    // figure out channel from the first MIDI message
+    MidiBuffer::Iterator it(*midiData);
+    const uint8* d;
+    int num, off;
+    it.getNextEvent(d, num, off);
+    channel = (d[0] & 0xf) + 1; // channel is last 4 bits + 1
+    
     bundleInit = true;
     
     if (audioInit)
@@ -147,6 +156,58 @@ void SwivelString::audioDeviceIOCallback(const float **inputChannelData,
         }
         determined_pitch = total/(freqs.size()-nancount);
         
+        // now that we have the pitch of the string we can start doing some interpolation
+        // first step is to figure out where our newly determined fundamental fits within our measured data
+        int above = -1;
+        int below = -1;
+        
+        for (int i = 0; i < fundamentals->size(); i++)
+        {
+            double current = (*fundamentals)[i];
+            
+            if (determined_pitch >= current)
+            {
+                if (below == -1)
+                    below = i;
+                else if (current >= (*fundamentals)[below]) // finding nearest measurement underneath
+                    below = i;
+            }
+            else // determined_pitch < current (finding nearest measurement above)
+            {
+                if (above == -1)
+                    above = i;
+                else if (current < (*fundamentals)[above])  // nearest
+                    above = i;
+            }
+        }
+        
+        // now we need to determine our interpolation constant, assuming linear interpolation
+        double lowest = (*fundamentals)[below];
+        double highest = (*fundamentals)[above];
+        double gapA = highest-lowest;
+        double gapB = determined_pitch - lowest;
+        double c = gapB / gapA;
+        
+        // now use c to fill in a lookup table of the extrapolated characteristics of the current tuning
+        Array<double> low = *(*measurements)[below];
+        Array<double> high = *(*measurements)[above]; // stupid asterisks are silly
+        for (int i = 0; low.size(); i++)
+        {
+            // just to check let's lay these out for now
+            double l = low[i];
+            double h = high[i];
+            double g = h-l;
+            double d = g*c;
+            double r = l+d;
+            derived_data.add(r);
+        }
+        
+        // now we can try to construct a table of pitch bend values for virtual frets
+        // to which we can quantise incoming notes
+        // TODO what to do with oopen strings?
+        // TODO how to extrapolate?
+        // TODO something better than linear interpolation for steps along the string
+        
         analysisThreadRef->notify(); // let's get out of here
     }
     
@@ -155,7 +216,7 @@ void SwivelString::audioDeviceIOCallback(const float **inputChannelData,
         
         // will need to:
         //          buffer audio to size of fft
-        //              TODO: overlap
+        //
         //          perform fft
         //          analyse
         static int input_index = 0;
@@ -355,4 +416,36 @@ bool SwivelString::isFullyInitialised()
 double SwivelString::getWaitTime()
 {
     return delay;
+}
+
+int SwivelString::getMidiChannel()
+{
+    return channel;
+}
+
+bool SwivelString::isReadyToTransform()
+{
+    return bundleInit && audioInit && (std::isnormal(determined_pitch));
+}
+
+//===============================================================================
+// Arguably the most important
+
+MidiMessage SwivelString::transform(juce::MidiMessage &msg)
+{
+    const uint8* data = msg.getRawData();
+#ifdef DEBUG // do some double checking
+    if (msg.getChannel() != channel)
+        throw std::logic_error("String on channel: " + std::to_string(channel) + " cannot transform message on channel: " + std::to_string(msg.getChannel()));
+#endif
+    if ((data[0] & 0xf0) != 176) return msg; // if it is anything but a pitchbend, just pass it straight through
+    
+    // otherwise transform it
+    // get the pitch bend number
+    int pitchIn = (data[2] << 7) | data[1]; // comes in LSB first?
+    
+    // using derived_data and the MSBS we can guess what frequency this might produce
+    // from there
+    
+    return MidiMessage();
 }

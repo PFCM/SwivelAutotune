@@ -230,6 +230,7 @@
 		32A6AA55183B1B5E005CD3D8 /* xmldraft.xml */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = text.xml; name = xmldraft.xml; path = ../../xmldraft.xml; sourceTree = "<group>"; };
 		32CD67CE11347480869AF063 /* juce_OptionalScopedPointer.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; name = juce_OptionalScopedPointer.h; path = ../../JuceLibraryCode/modules/juce_core/memory/juce_OptionalScopedPointer.h; sourceTree = SOURCE_ROOT; };
 		32F2D066183DA4CA00E14E9F /* badxml.xml */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = text.xml; name = badxml.xml; path = ../../badxml.xml; sourceTree = "<group>"; };
+		32F52D8F18442A3300A4767A /* ElementComparator.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; name = ElementComparator.h; path = ../../Source/ElementComparator.h; sourceTree = "<group>"; };
 		32F543827BC8CA3ADB06DF20 /* juce_LowLevelGraphicsSoftwareRenderer.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; name = juce_LowLevelGraphicsSoftwareRenderer.h; path = ../../JuceLibraryCode/modules/juce_graphics/contexts/juce_LowLevelGraphicsSoftwareRenderer.h; sourceTree = SOURCE_ROOT; };
 		32FFA1481839C7DF00598F52 /* Windowing.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; name = Windowing.h; path = ../../Source/Windowing.h; sourceTree = "<group>"; };
 		32FFA14A1839D26700598F52 /* libfftw3.3.dylib */ = {isa = PBXFileReference; lastKnownFileType = "compiled.mach-o.dylib"; name = libfftw3.3.dylib; path = ../../../../../../usr/local/lib/libfftw3.3.dylib; sourceTree = "<group>"; };
@@ -2404,6 +2405,7 @@
 				32179467183EB2520002F70E /* AnalysisThread.h */,
 				32433936183C5AEB009793BE /* String.cpp */,
 				32433937183C5AEB009793BE /* String.h */,
+				32F52D8F18442A3300A4767A /* ElementComparator.h */,
 				32433938183C5AEB009793BE /* SwivelStringFileParser.cpp */,
 				32433939183C5AEB009793BE /* SwivelStringFileParser.h */,
 				32FFA1481839C7DF00598F52 /* Windowing.h */,

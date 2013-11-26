@@ -23,6 +23,7 @@ class AnalysisThread : public Thread
 public:
     // Constructs a new thread, needs a few references to get going
     AnalysisThread(AudioDeviceManager *manager, MidiOutput *mout, OwnedArray<SwivelString, CriticalSection> *strings);
+    ~AnalysisThread();
     
     /** Run method, gets called in a new thread when start() is called,
      *  Don't call this yourself, unless you don't actually want it to 

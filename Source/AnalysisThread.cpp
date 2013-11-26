@@ -14,6 +14,11 @@ AnalysisThread::AnalysisThread(AudioDeviceManager *manager, MidiOutput *mout, Ow
     
 }
 
+AnalysisThread::~AnalysisThread()
+{
+    stopThread(10);
+}
+
 //====================================================================================================================
 void AnalysisThread::run()
 {
@@ -59,22 +64,6 @@ void AnalysisThread::run()
         // send the midi
         log("Sending MIDI\n");
         
-        /*trying to find the problem
-        MidiBuffer m = *current->getMidiBuffer();
-        bool b = m.isEmpty();
-        const uint8* bytes;
-        int offset;
-        int num;
-        MidiBuffer::Iterator it(m);
-        while (it.getNextEvent(bytes, num, offset))
-        {
-            for (int g = 0; g < 3; g++)
-            {
-                int x = bytes[g];
-                int y = 3;
-            }
-        }*/
-        
         midiOut->sendBlockOfMessages(*current->getMidiBuffer(), Time::getMillisecondCounter()+100, 44100);
         log("Midi begun, waiting: " + String(current->getWaitTime()+100) + "ms\n");
         
@@ -86,7 +75,7 @@ void AnalysisThread::run()
         deviceManager->addAudioCallback(current);
         
         // somehow know when it has done its work
-        if (!wait(150000))
+        if (!wait(15000))
         {
             log("Processing timeout expired\n");
         }

@@ -10,6 +10,7 @@
 #include "Windowing.h"
 #include <Accelerate/Accelerate.h>
 #include "MainComponent.h"
+#include "ElementComparator.h"
 
 //===========================================================
 // Constructs a new string.
@@ -142,22 +143,62 @@ void SwivelString::audioDeviceIOCallback(const float **inputChannelData,
         gate = false;
         std::cout << "off" <<std::endl;
         
-        //TODO this better
-        // for now we will just average all of these
-        // not ideal, because we tend to get jumps
-        // in one direction only
-        
-        // also getting some weird nans, so we will ignore those
-        int nancount = 0;
-        double total = 0;
-        for (int i = 0; i < freqs.size(); i++)
+        //probably an unnecessarily intimidating way to do this
+        std::function<int (double,double)> compare =
+        [] (double a, double b) -> int
         {
-            if (!std::isnan(freqs[i]))
-                total += freqs[i];
+            if (b-a > 0)
+                return -1;
+            if (b-a < 0)
+                return 1;
             else
-                ++nancount;
+                return 0;
+        };
+        
+        ElementComparator<double> e(compare);
+        
+        freqs.sort(e);
+        
+        OwnedArray<Range> ranges; // a range is an tuple of lowest(double), highest(double), start index(int) and end(int)
+        ranges.add(new std::tuple<double, double, int, int>(freqs[0], 0.0, 0, 1));
+        
+        double threshold = 1.0; // maximum size of range
+        int rindex = 0;
+        for (int i = 1; i < freqs.size(); i++)
+        {
+            if ((freqs[i]-std::get<0>(*ranges[rindex])) < threshold)
+            {
+                std::get<3>(*ranges[rindex]) = i+1;
+                if ((freqs[i] - std::get<1>(*ranges[rindex])) > 0)
+                    std::get<1>(*ranges[rindex]) = freqs[i];
+            }
+            else // this particular range is done
+            {
+                ranges.add(new Range(freqs[i], 0.0, i, i+1));
+                rindex++;
+            }
         }
-        determined_pitch = total/(freqs.size()-nancount);
+        
+        // find the range with the most data
+        int best = 0;
+        int bestsize = 0;
+        bestsize = std::get<3>(*ranges[best]) - std::get<2>(*ranges[best]);
+        for (int i = 1; i < ranges.size(); i++)
+        {
+            if (std::get<3>(*ranges[i]) - std::get<2>(*ranges[i]) > bestsize)
+            {
+                best = i;
+                bestsize = std::get<3>(*ranges[i]) - std::get<2>(*ranges[i]);
+            }
+        }
+        Range bestRange = *ranges[best];
+        double total = 0;
+        for (int i = std::get<2>(bestRange); i < std::get<3>(bestRange); i++)
+        {
+            total += freqs[i];
+        }
+        
+        determined_pitch = total / bestsize;
         
         // now that we have the pitch of the string we can start doing some interpolation
         // first step is to figure out where our newly determined fundamental fits within our measured data

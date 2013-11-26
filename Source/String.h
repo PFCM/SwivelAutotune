@@ -16,6 +16,7 @@
 #define __SwivelAutotune__String__
 
 #include <iostream>
+#include <tuple>
 #include "../JuceLibraryCode/JuceHeader.h"
 #include <fftw3.h>
 #include "SwivelStringFileParser.h"
@@ -71,6 +72,9 @@ public:
     void reset();
     
 private:
+    //===========================================
+    typedef std::tuple<double, double, int, int> Range;
+    
     //===========================================
     // how to make it go
     ScopedPointer<MidiBuffer> midiData;

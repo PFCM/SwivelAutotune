@@ -180,25 +180,21 @@ void SwivelString::audioDeviceIOCallback(const float **inputChannelData,
         }
         
         // find the range with the most data
-        int best = 0;
-        int bestsize = 0;
-        bestsize = std::get<3>(*ranges[best]) - std::get<2>(*ranges[best]);
-        for (int i = 1; i < ranges.size(); i++)
+        Range bestRange(0,0,0,0);
+        for (Range*& r : ranges)
         {
-            if (std::get<3>(*ranges[i]) - std::get<2>(*ranges[i]) > bestsize)
+            if (std::get<3>(*r)-std::get<2>(*r) > std::get<3>(bestRange)-std::get<2>(bestRange))
             {
-                best = i;
-                bestsize = std::get<3>(*ranges[i]) - std::get<2>(*ranges[i]);
+                bestRange = *r; // copy the best into bestRange
             }
         }
-        Range bestRange = *ranges[best];
         double total = 0;
         for (int i = std::get<2>(bestRange); i < std::get<3>(bestRange); i++)
         {
             total += freqs[i];
         }
         
-        determined_pitch = total / bestsize;
+        determined_pitch = total / (std::get<3>(bestRange)-std::get<2>(bestRange));
         
         // now that we have the pitch of the string we can start doing some interpolation
         // first step is to figure out where our newly determined fundamental fits within our measured data
@@ -233,13 +229,13 @@ void SwivelString::audioDeviceIOCallback(const float **inputChannelData,
         double c = gapB / gapA;
         
         // now use c to fill in a lookup table of the extrapolated characteristics of the current tuning
-        Array<double> low = *(*measurements)[below];
-        Array<double> high = *(*measurements)[above]; // stupid asterisks are silly
-        for (int i = 0; i < low.size(); i++)
+        Array<double>* low = (*measurements)[below];
+        Array<double>* high = (*measurements)[above]; // stupid asterisks are silly
+        for (int i = 0; i < low->size(); i++)
         {
             // just to check let's lay these out for now
-            double l = low[i];
-            double h = high[i];
+            double l = (*low)[i];
+            double h = (*high)[i];
             double g = h-l;
             double d = g*c;
             double r = l+d;

@@ -12,6 +12,9 @@
 #include "../JuceLibraryCode/JuceHeader.h"
 #include "String.h"
 
+class MainComponent;
+#include "MainComponent.h"
+
 /** A thread to perform our analysis.
  *  Note that this thread will likely not
  *  respond to 'threadShouldExit()'
@@ -22,7 +25,7 @@ class AnalysisThread : public Thread
 {
 public:
     // Constructs a new thread, needs a few references to get going
-    AnalysisThread(AudioDeviceManager *manager, MidiOutput *mout, OwnedArray<SwivelString, CriticalSection> *strings);
+    AnalysisThread(AudioDeviceManager *manager, MidiOutput *mout, OwnedArray<SwivelString, CriticalSection> *strings, MainComponent* m);
     ~AnalysisThread();
     
     /** Run method, gets called in a new thread when start() is called,
@@ -35,12 +38,24 @@ public:
     /** Sets the FFT size and overlap (in that order)*/
     void setFFTParams(int size, int overlap);
     
+    class AnalysisEndMessage : public CallbackMessage
+    {
+    public:
+        AnalysisEndMessage(Result r, MainComponent* m) : result(r), main(m) {};
+        void messageCallback();
+        
+    private:
+        Result result;
+        MainComponent* main;
+    };
+    
 private:
     // The audio input device
     AudioDeviceManager* deviceManager;
     MidiOutput* midiOut;
     OwnedArray<SwivelString, CriticalSection>* swivelStrings;
     TextEditor* console;
+    MainComponent* main;
     
     // processing buffers
     double* audio;
@@ -49,6 +64,7 @@ private:
     int fft_size;
     int overlap;
     int hop_size;
+    bool failed;
     
     
     void log(String message);

@@ -12,7 +12,7 @@
 using namespace std;
 
 //==============================================================================================
-MainComponent::MainComponent()
+MainComponent::MainComponent() : running(false)
 {
     setSize(700, 300);
     deviceManager = new AudioDeviceManager();
@@ -183,7 +183,6 @@ void MainComponent::comboBoxChanged(juce::ComboBox *box)
 
 void MainComponent::buttonClicked(juce::Button *button)
 {
-    static bool running = false;
     if (goButton == button)
     {
         if (running == false)
@@ -193,7 +192,7 @@ void MainComponent::buttonClicked(juce::Button *button)
         }
         else // running must == true
         {
-            end();
+            endPrematurely();
             running = false;
         }
     }
@@ -227,7 +226,7 @@ void MainComponent::begin()
     log("-----------------------------------------------------\n", console);
     //initialise string objects
     log(" Initialising background thread\n", console);
-    analysisThread = new AnalysisThread(deviceManager, midiOutBox->getSelectedOutput(), &swivelStrings);
+    analysisThread = new AnalysisThread(deviceManager, midiOutBox->getSelectedOutput(), &swivelStrings, this);
     midiOutBox->getSelectedOutput()->startBackgroundThread();
 #ifdef DEBUG
     analysisThread->setConsole(console);
@@ -264,21 +263,49 @@ void MainComponent::begin()
 */
 }
 
-void MainComponent::end()
+void MainComponent::end(bool success)
 {
-    log("-----------------------------------------------------\n", console);
-    log("----------------------STOPPING-----------------------\n", console);
-    log("-----------------------------------------------------\n", console);
-    goButton->setButtonText("GO");
-    analysisThread->stopThread(100);
-    midiOutBox->getSelectedOutput()->stopBackgroundThread();
-    /*reporter->stopTimer();
-    for (int i = 0; i < swivelStrings.size(); i++)
+    if (success)
+    {
+        
+        log("-----------------------------------------------------\n", console);
+        log("------------------------DONE-------------------------\n", console);
+        log("-----------------------------------------------------\n", console);
+        analysisThread->stopThread(100);
+        running = false;
+        goButton->setButtonText("GO");
+    
+        for (SwivelString*& string : swivelStrings)
+        {
+            if (string->isReadyToTransform())
+                log("String on channel: " + String(string->getMidiChannel()) + " is at " + String(string->getBestFreq()) + "Hz\n", console);
+            else
+                log("String on channel: " + String(string->getMidiChannel()) + " is not ready somehow.\n", console);
+        }
+    }
+    else
+    {
+        log("-----------------------------------------------------\n", console);
+        log("------------STOPPING--WITH-ERROR---------------------\n", console);
+        log("-----------------------------------------------------\n", console);
+        goButton->setButtonText("GO");
+        analysisThread->stopThread(100);
+        midiOutBox->getSelectedOutput()->stopBackgroundThread();
+        /*reporter->stopTimer();
+     for (int i = 0; i < swivelStrings.size(); i++)
         deviceManager->removeAudioCallback(swivelStrings[i]);
-    goButton->setButtonText("GO");
-    MidiOutput* midi = midiOutBox->getSelectedOutput();
-    midi->stopBackgroundThread();*/
+     goButton->setButtonText("GO");
+     MidiOutput* midi = midiOutBox->getSelectedOutput();
+     midi->stopBackgroundThread();*/
+    }
 }
+
+void MainComponent::endPrematurely()
+{
+    log("Ending, will probably cause analysis thread to crash\n", console);
+    analysisThread->stopThread(1);
+}
+
 
 //===============================================================================================
 void MainComponent::handleIncomingMidiMessage(juce::MidiInput *source, const juce::MidiMessage &message)
@@ -308,6 +335,19 @@ void MainComponent::handleIncomingMidiMessage(juce::MidiInput *source, const juc
         std::cerr << e.what();
     }
 #endif
+}
+
+void MainComponent::notifyResult(juce::Result result)
+{
+    if (result)
+    {
+        end(true);
+    }
+    else
+    {
+        log(result.getErrorMessage(), console);
+        end(false);
+    }
 }
 
 

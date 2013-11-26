@@ -12,6 +12,7 @@
 #include "../JuceLibraryCode/JuceHeader.h"
 #include "String.h"
 #include "MidiDeviceSelector.h"
+class AnalysisThread;
 #include "AnalysisThread.h"
 
 class MainComponent : public    Component,
@@ -19,6 +20,7 @@ class MainComponent : public    Component,
                                 Button::Listener,
                                 MidiInputCallback
 {
+    
 public:
     MainComponent();
     ~MainComponent();
@@ -39,6 +41,9 @@ public:
         BLACKMAN,
         RECTANGULAR
     };
+    
+    // notifies the main component of the results of the analysis
+    void notifyResult(Result result);
     
 private:
     // for ease of use
@@ -133,10 +138,12 @@ private:
     //////////////////////////////////////////////////////////////////////
     //////////////////////////////////////////////////////////////////////
     void begin();/////////////////////////////////////////////////////////
-    void end();  /////////////////////////////////////////////////////////
-    //////////////////////////////////////////////////////////////////////
+    void end(bool success);  /////////////////////////////////////////////
+    void endPrematurely();   /////////////////////////////////////////////
     //////////////////////////////////////////////////////////////////////
     //==========================================================
+    // is analysis running?
+    bool running;
     
     JUCE_DECLARE_NON_COPYABLE_WITH_LEAK_DETECTOR (MainComponent)
 };

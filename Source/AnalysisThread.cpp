@@ -8,8 +8,16 @@
 
 #include "AnalysisThread.h"
 
-AnalysisThread::AnalysisThread(AudioDeviceManager *manager, MidiOutput *mout, OwnedArray<SwivelString, CriticalSection> *strings)
-: Thread("Analysis Thread"), deviceManager(manager), midiOut(mout), swivelStrings(strings), console(nullptr), audio(nullptr), spectrum(nullptr)
+AnalysisThread::AnalysisThread(AudioDeviceManager *manager, MidiOutput *mout, OwnedArray<SwivelString, CriticalSection> *strings, MainComponent* m)
+:   Thread("Analysis Thread"),
+    deviceManager(manager),
+    midiOut(mout),
+    swivelStrings(strings),
+    console(nullptr),
+    main(m),
+    audio(nullptr),
+    spectrum(nullptr),
+    failed(false)
 {
     
 }
@@ -52,12 +60,14 @@ void AnalysisThread::run()
     for (int i = 0; i < swivelStrings->size(); i++) // for each string
     {
         SwivelString* current = (*swivelStrings)[i];
+        if (current->isReadyToTransform()) // then this must have been done before
+            current->reset();
         // make sure they're good to go on the audio front
         current->initialiseAudioParameters(plan, audio, spectrum, fft_size, deviceManager->getCurrentAudioDevice()->getCurrentSampleRate(), overlap);
         // make sure we're good to go
         if (!current->isFullyInitialised())
         {
-            log("ERROR: string not fully initialised\n");
+            log("ERROR: string not fully initialised, probably missing file data\n");
             break;
         }
         
@@ -89,6 +99,7 @@ void AnalysisThread::run()
         
         if (threadShouldExit())
         {
+            failed = true;
             break;
         }
     }
@@ -102,6 +113,11 @@ void AnalysisThread::exitThread()
         free(audio);
     if (spectrum != nullptr)
         free(spectrum);
+    
+    if (failed)
+        (new AnalysisEndMessage(Result::fail("Thread exited early, state undefined."), main))->post();
+    else
+        (new AnalysisEndMessage(Result::ok(), main))->post();
 }
 
 
@@ -128,4 +144,10 @@ void AnalysisThread::log(String msg)
     MessageManagerLock mml; // get a lock on the message manager thread
     console->insertTextAtCaret(msg); // write the mesage
     //std::cout << msg;
+}
+
+//======================================================================================================================
+void AnalysisThread::AnalysisEndMessage::messageCallback()
+{
+    main->notifyResult(result);
 }

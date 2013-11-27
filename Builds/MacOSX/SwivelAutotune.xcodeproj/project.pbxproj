@@ -13,6 +13,7 @@
 		2B0FF0FCB8F7A318C4ABCD42 /* juce_audio_processors.mm in Sources */ = {isa = PBXBuildFile; fileRef = 719FB52ED246920763A39CC5 /* juce_audio_processors.mm */; };
 		32179465183E98C30002F70E /* MultipleString.xml in Resources */ = {isa = PBXBuildFile; fileRef = 32179464183E98C30002F70E /* MultipleString.xml */; };
 		32179468183EB2520002F70E /* AnalysisThread.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 32179466183EB2520002F70E /* AnalysisThread.cpp */; };
+		3228B9561845490900FF6748 /* newxml.xml in Resources */ = {isa = PBXBuildFile; fileRef = 3228B9551845490900FF6748 /* newxml.xml */; };
 		3243393A183C5AEB009793BE /* MainComponent.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 32433934183C5AEB009793BE /* MainComponent.cpp */; };
 		3243393B183C5AEB009793BE /* String.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 32433936183C5AEB009793BE /* String.cpp */; };
 		3243393C183C5AEB009793BE /* SwivelStringFileParser.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 32433938183C5AEB009793BE /* SwivelStringFileParser.cpp */; };
@@ -218,6 +219,7 @@
 		32179464183E98C30002F70E /* MultipleString.xml */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = text.xml; name = MultipleString.xml; path = ../../MultipleString.xml; sourceTree = "<group>"; };
 		32179466183EB2520002F70E /* AnalysisThread.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; name = AnalysisThread.cpp; path = ../../Source/AnalysisThread.cpp; sourceTree = "<group>"; };
 		32179467183EB2520002F70E /* AnalysisThread.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; name = AnalysisThread.h; path = ../../Source/AnalysisThread.h; sourceTree = "<group>"; };
+		3228B9551845490900FF6748 /* newxml.xml */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = text.xml; name = newxml.xml; path = ../../newxml.xml; sourceTree = "<group>"; };
 		32433934183C5AEB009793BE /* MainComponent.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; name = MainComponent.cpp; path = ../../Source/MainComponent.cpp; sourceTree = "<group>"; };
 		32433935183C5AEB009793BE /* MainComponent.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; name = MainComponent.h; path = ../../Source/MainComponent.h; sourceTree = "<group>"; };
 		32433936183C5AEB009793BE /* String.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; name = String.cpp; path = ../../Source/String.cpp; sourceTree = "<group>"; };
@@ -1174,6 +1176,7 @@
 			isa = PBXGroup;
 			children = (
 				32A6AA55183B1B5E005CD3D8 /* xmldraft.xml */,
+				3228B9551845490900FF6748 /* newxml.xml */,
 				32179464183E98C30002F70E /* MultipleString.xml */,
 				32F2D066183DA4CA00E14E9F /* badxml.xml */,
 			);
@@ -2716,6 +2719,7 @@
 			isa = PBXResourcesBuildPhase;
 			buildActionMask = 2147483647;
 			files = (
+				3228B9561845490900FF6748 /* newxml.xml in Resources */,
 				32179465183E98C30002F70E /* MultipleString.xml in Resources */,
 				32F2D067183DA4CA00E14E9F /* badxml.xml in Resources */,
 				FA1B05D93C6E0BAB4AB6E158 /* RecentFilesMenuTemplate.nib in Resources */,

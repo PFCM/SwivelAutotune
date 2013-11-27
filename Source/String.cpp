@@ -144,7 +144,7 @@ void SwivelString::audioDeviceIOCallback(const float **inputChannelData,
         std::cout << "off" <<std::endl;
         
         //probably an unnecessarily intimidating way to do this
-        std::function<int (double,double)> compare =
+        /*std::function<int (double,double)>*/ auto compare =
         [] (double a, double b) -> int
         {
             if (b-a > 0)
@@ -196,6 +196,8 @@ void SwivelString::audioDeviceIOCallback(const float **inputChannelData,
         
         determined_pitch = total / (std::get<3>(bestRange)-std::get<2>(bestRange));
         
+        
+        // we could (maybe should) move this stuff to a different function, called on a new thread maybe?
         // now that we have the pitch of the string we can start doing some interpolation
         // first step is to figure out where our newly determined fundamental fits within our measured data
         int above = -1;
@@ -243,7 +245,6 @@ void SwivelString::audioDeviceIOCallback(const float **inputChannelData,
         }
         
         // now we can try to construct a table of pitch bend values for virtual frets
-        // to which we can quantise incoming notes
         // TODO how to extrapolate?
         // TODO something better than linear interpolation for steps along the string
         
@@ -251,34 +252,52 @@ void SwivelString::audioDeviceIOCallback(const float **inputChannelData,
         int dIndex=0;
         int number = num;
         // we are going to make a two octave lookup table of pitch bend values by note numbers
-        
+        int gtcount = 0; // how many times we've had to go over the top
         for (int i = 0; i < targets->size(); i++,number++)
         {
-            if ((*targets)[i] < determined_pitch || (*targets)[i] > derived_data[derived_data.size()-1]) // we can't do much with values lower than the open string
+            if ((*targets)[i] < determined_pitch) // we can't do much with values lower than the open string
                 note_key_table.set(number, INVALID_NOTE);
+            if ((*targets)[i] > derived_data[derived_data.size()-1]) // for now we will just take the gradient between the highest two
+            {
+                ++gtcount;
+                double m = note_key_table[number-gtcount] - note_key_table[number-gtcount-1]; // need to stop this wrapping
+                int amount = gtcount*m;
+                int last = note_key_table[number-gtcount]; // just so we can see it in the debugger
+                int result = note_key_table[number-gtcount] + amount; // store it in a signed int to clamp it easier
+                if (result < 0)
+                {
+                    result = 0;
+                }
+                note_key_table.set(number, result);
+            }
             else // must be greater than or equal to determined_pitch
             {
                 double target = (*targets)[i];
                 while (target >= derived_data[dIndex])
                     dIndex++;
-                // issue here with the derived data being smaller than targets
-                // will do some fancy extrapolation
-                // but for now we will fill in those values with INVALID_NOTES
-                double a = derived_data[dIndex] - derived_data[dIndex-1];
-                double b = 0;
-                if (dIndex == 0)
-                    b = determined_pitch - derived_data[dIndex-1];
-                else
-                    b = target - derived_data[dIndex-1];
-                double c = b/a;
-                int start = (*midiPitchBend)[dIndex];
-                int end   = 0;
-                if (dIndex == 0)
-                    end = 127;
-                else
-                    end = (*midiPitchBend)[dIndex-1];
                 
-                note_key_table.set(number, end + (start-end)*c);
+                if (dIndex == 0)
+                {
+                    note_key_table.set(number, OFFSTRING_NOTE);
+                }
+                else
+                {
+                    double a = derived_data[dIndex] - determined_pitch;
+                    double b/* = 0;
+                             if (dIndex == 0)
+                             b = target - determined_pitch;
+                             else
+                             b */= target - derived_data[dIndex-1];
+                    double c = b/a;
+                    int start = (*midiPitchBend)[dIndex];
+                    int end   /*= 0;
+                               if (dIndex == 0)
+                               end = 127<<7;
+                               else
+                               end */= (*midiPitchBend)[dIndex-1];
+                    
+                    note_key_table.set(number, end + (start-end)*c);
+                }
             }
         }
         
@@ -542,7 +561,7 @@ MidiMessage SwivelString::transform(const juce::MidiMessage &msg) const
                                " given note number: " +
                                std::to_string(msg.getNoteNumber()) +
                                " which is outside operating range of" +
-                               std::to_string(num) + "--" + std::to_string(num+24));
+                               std::to_string(num) + "--" + std::to_string(num+24) + "\n'");
 #endif
     // get status half of the first byte
     uint8 status = data[0] & 0xf0;
@@ -607,12 +626,17 @@ MidiMessage SwivelString::transform(const juce::MidiMessage &msg) const
         // grab pitch bend value for the note, velocity currently ignored, could be mapped to pressure or something
         uint16 pbv = note_key_table[data[1]];
         if (pbv == INVALID_NOTE) return MidiMessage();
+        if (pbv == OFFSTRING_NOTE)
+        {
+            std::cout << "note becomes open string\n";
+            return MidiMessage();
+        }
         uint8 d1 = pbv & 0x7f; // LSB
         uint8 d2 = (pbv >> 7) & 0x7f; // MSB
         
         current_note = data[1]; // store for calculating pitch bend
         
-        return MidiMessage(176+channel-1, d1, d2);
+        return MidiMessage(224+channel-1, d1, d2);
     }
     
     return MidiMessage(); // default exit point does nothing just makes sure it compiles

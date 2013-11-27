@@ -131,9 +131,10 @@ private:
     double determined_pitch;
     
     // some constants to save time
-    static constexpr double ONEDIVPI     = 1.0/M_PI;
-    static constexpr double HALFPI       = 0.5*M_PI;
-    static constexpr uint8  INVALID_NOTE = 0xff; // could be anything > 127
+    static constexpr double ONEDIVPI       = 1.0/M_PI;
+    static constexpr double HALFPI         = 0.5*M_PI;
+    static constexpr uint8  INVALID_NOTE   = 0xff; // could be anything > 127
+    static constexpr uint8  OFFSTRING_NOTE = 0xfe;
     
     //===============================================
     // some MIDI info

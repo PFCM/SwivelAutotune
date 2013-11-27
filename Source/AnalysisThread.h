@@ -31,7 +31,7 @@ public:
     /** Run method, gets called in a new thread when start() is called,
      *  Don't call this yourself, unless you don't actually want it to 
      *  run in a new thread */
-    void run();
+    void run() override;
     
     /** Sets the console to use for output. If nullptr nothing is output */
     void setConsole(TextEditor* where);

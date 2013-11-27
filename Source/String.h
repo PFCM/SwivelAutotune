@@ -150,7 +150,8 @@ private:
     static constexpr uint8  OFFSTRING_NOTE = 0xfe;
     // A note that is near enough to the open string that it is worth playing
     static constexpr uint8  OPEN_NOTE      = 0xfd;
-    
+    // returns distance on cents (100th of an equal-tempered semitone)
+    static double cents(double a, double b);
     //===============================================
     // some MIDI info
     int channel;

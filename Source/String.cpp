@@ -296,6 +296,15 @@ void SwivelString::processFrequencies()
         }
     }
     
+    if (above == -1 || below == -1)
+    {
+        // issue, throw exception or return?
+        // probably return
+        std::cerr << "String frequency outside range of data" << std::endl;
+        analysisThreadRef->notify();
+        return;
+    }
+    
     // now we need to determine our interpolation constant, assuming linear interpolation
     double lowest = (*fundamentals)[below];
     double highest = (*fundamentals)[above];
@@ -432,7 +441,7 @@ void SwivelString::fillLookupTable(Array<double>& derived_data)
             
             if (dIndex == 0)
             {
-                if (std::fabs(1-(target/determined_pitch)) < 0.001)
+                if (std::fabs(cents(target, determined_pitch)) < 15)
                     note_key_table.set(number, OPEN_NOTE);
                 else
                     note_key_table.set(number, OFFSTRING_NOTE);
@@ -529,6 +538,12 @@ void SwivelString::window(double *input, int size)
         default: // default is no windowing
             break;
     }
+}
+
+// returns the difference between the two in cents
+double SwivelString::cents(double a, double b)
+{
+    return 1200.0 * std::log2(b/a);
 }
 
 //================================================================================
@@ -680,3 +695,4 @@ MidiMessage SwivelString::transform(const juce::MidiMessage &msg) const
     
     return MidiMessage(); // default exit point does nothing just makes sure it compiles
 }
+

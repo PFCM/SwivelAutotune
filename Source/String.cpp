@@ -131,13 +131,13 @@ void SwivelString::audioDeviceIOCallback(const float **inputChannelData,
     float RMS =0;
     vDSP_rmsqv(inputChannelData[0], 1, &RMS, numSamples);
     //std::cout << RMS <<std::endl;
-    if (RMS >= 0.01 && gate == false)
+    if (RMS >= 0.001 && gate == false)
     {
         processing = true;
         gate = true;
         std::cout << "bang" <<std::endl;
     }
-    if (freqs.size() >= 20 || (RMS <= 0.01 && gate == true))
+    if (freqs.size() >= 20 || (RMS <= 0.001 && gate == true))
     {
         processing = false;
         gate = false;
@@ -242,7 +242,9 @@ void SwivelString::audioDeviceIOCallback(const float **inputChannelData,
             double d = g*c;
             double r = l+d;
             derived_data.add(r);
+            std::cout << r<< std::endl;
         }
+        
         
         // now we can try to construct a table of pitch bend values for virtual frets
         // TODO how to extrapolate?
@@ -282,7 +284,7 @@ void SwivelString::audioDeviceIOCallback(const float **inputChannelData,
                 }
                 else
                 {
-                    double a = derived_data[dIndex] - determined_pitch;
+                    double a = derived_data[dIndex] - derived_data[dIndex-1];
                     double b/* = 0;
                              if (dIndex == 0)
                              b = target - determined_pitch;
@@ -299,6 +301,16 @@ void SwivelString::audioDeviceIOCallback(const float **inputChannelData,
                     note_key_table.set(number, end + (start-end)*c);
                 }
             }
+        }
+        for (int i = num; i < num+24; i++)
+        {
+            uint16 note = note_key_table[i];
+            if (note == OFFSTRING_NOTE)
+                std::cout << "NOTE OFF STRING\n";
+            else if (note == INVALID_NOTE)
+                std::cout << "INVALID NOTE\n";
+            else
+                std::cout << note << std::endl;
         }
         
         
@@ -565,11 +577,11 @@ MidiMessage SwivelString::transform(const juce::MidiMessage &msg) const
 #endif
     // get status half of the first byte
     uint8 status = data[0] & 0xf0;
-    if (!(status == 176 || status == 144)) return msg; // if it is anything but a pitchbend or a noteon, just pass it straight through
+    if (!(status == 224 || status == 144)) return msg; // if it is anything but a pitchbend or a noteon, just pass it straight through
     
     // otherwise transform it
     // get the pitch bend number
-    if (status == 176)
+    if (status == 224)
     {
         int pitchIn = (data[2] << 7) | data[1]; // comes in LSB first?
         
@@ -619,7 +631,7 @@ MidiMessage SwivelString::transform(const juce::MidiMessage &msg) const
         uint8 d1 = val & 0x7f;
         uint8 d2 = (val >> 7) & 0x7f;
         
-        return MidiMessage(176+channel-1, d1, d2);
+        return MidiMessage(224+channel-1, d1, d2);
     }
     else if (status == 144) // note on, move to a calculated position
     {

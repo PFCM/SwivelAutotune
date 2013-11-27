@@ -143,176 +143,9 @@ void SwivelString::audioDeviceIOCallback(const float **inputChannelData,
         gate = false;
         std::cout << "off" <<std::endl;
         
-        //probably an unnecessarily intimidating way to do this
-        /*std::function<int (double,double)>*/ auto compare =
-        [] (double a, double b) -> int
-        {
-            if (b-a > 0)
-                return -1;
-            if (b-a < 0)
-                return 1;
-            else
-                return 0;
-        };
-        
-        ElementComparator<double> e(compare);
-        
-        freqs.sort(e);
-        
-        OwnedArray<Range> ranges; // a range is an tuple of lowest(double), highest(double), start index(int) and end(int)
-        ranges.add(new std::tuple<double, double, int, int>(freqs[0], 0.0, 0, 1));
-        
-        double threshold = 1.0; // maximum size of range
-        int rindex = 0;
-        for (int i = 1; i < freqs.size(); i++)
-        {
-            if ((freqs[i]-std::get<0>(*ranges[rindex])) < threshold)
-            {
-                std::get<3>(*ranges[rindex]) = i+1;
-                if ((freqs[i] - std::get<1>(*ranges[rindex])) > 0)
-                    std::get<1>(*ranges[rindex]) = freqs[i];
-            }
-            else // this particular range is done
-            {
-                ranges.add(new Range(freqs[i], 0.0, i, i+1));
-                rindex++;
-            }
-        }
-        
-        // find the range with the most data
-        Range bestRange(0,0,0,0);
-        for (Range*& r : ranges)
-        {
-            if (std::get<3>(*r)-std::get<2>(*r) > std::get<3>(bestRange)-std::get<2>(bestRange))
-            {
-                bestRange = *r; // copy the best into bestRange
-            }
-        }
-        double total = 0;
-        for (int i = std::get<2>(bestRange); i < std::get<3>(bestRange); i++)
-        {
-            total += freqs[i];
-        }
-        
-        determined_pitch = total / (std::get<3>(bestRange)-std::get<2>(bestRange));
-        
-        
-        // we could (maybe should) move this stuff to a different function, called on a new thread maybe?
-        // now that we have the pitch of the string we can start doing some interpolation
-        // first step is to figure out where our newly determined fundamental fits within our measured data
-        int above = -1;
-        int below = -1;
-        
-        for (int i = 0; i < fundamentals->size(); i++)
-        {
-            double current = (*fundamentals)[i];
-            
-            if (determined_pitch >= current)
-            {
-                if (below == -1)
-                    below = i;
-                else if (current >= (*fundamentals)[below]) // finding nearest measurement underneath
-                    below = i;
-            }
-            else // determined_pitch < current (finding nearest measurement above)
-            {
-                if (above == -1)
-                    above = i;
-                else if (current < (*fundamentals)[above])  // nearest
-                    above = i;
-            }
-        }
-        
-        // now we need to determine our interpolation constant, assuming linear interpolation
-        double lowest = (*fundamentals)[below];
-        double highest = (*fundamentals)[above];
-        double gapA = highest-lowest;
-        double gapB = determined_pitch - lowest;
-        double c = gapB / gapA;
-        
-        // now use c to fill in a lookup table of the extrapolated characteristics of the current tuning
-        Array<double>* low = (*measurements)[below];
-        Array<double>* high = (*measurements)[above]; // stupid asterisks are silly
-        for (int i = 0; i < low->size(); i++)
-        {
-            // just to check let's lay these out for now
-            double l = (*low)[i];
-            double h = (*high)[i];
-            double g = h-l;
-            double d = g*c;
-            double r = l+d;
-            derived_data.add(r);
-            std::cout << r<< std::endl;
-        }
-        
-        
-        // now we can try to construct a table of pitch bend values for virtual frets
-        // TODO how to extrapolate?
-        // TODO something better than linear interpolation for steps along the string
-        
-        // start by going through each target
-        int dIndex=0;
-        int number = num;
-        // we are going to make a two octave lookup table of pitch bend values by note numbers
-        int gtcount = 0; // how many times we've had to go over the top
-        for (int i = 0; i < targets->size(); i++,number++)
-        {
-            if ((*targets)[i] < determined_pitch) // we can't do much with values lower than the open string
-                note_key_table.set(number, INVALID_NOTE);
-            if ((*targets)[i] > derived_data[derived_data.size()-1]) // for now we will just take the gradient between the highest two
-            {
-                ++gtcount;
-                double m = note_key_table[number-gtcount] - note_key_table[number-gtcount-1]; // need to stop this wrapping
-                int amount = gtcount*m;
-                int last = note_key_table[number-gtcount]; // just so we can see it in the debugger
-                int result = note_key_table[number-gtcount] + amount; // store it in a signed int to clamp it easier
-                if (result < 0)
-                {
-                    result = 0;
-                }
-                note_key_table.set(number, result);
-            }
-            else // must be greater than or equal to determined_pitch
-            {
-                double target = (*targets)[i];
-                while (target >= derived_data[dIndex])
-                    dIndex++;
-                
-                if (dIndex == 0)
-                {
-                    note_key_table.set(number, OFFSTRING_NOTE);
-                }
-                else
-                {
-                    double a = derived_data[dIndex] - derived_data[dIndex-1];
-                    double b/* = 0;
-                             if (dIndex == 0)
-                             b = target - determined_pitch;
-                             else
-                             b */= target - derived_data[dIndex-1];
-                    double c = b/a;
-                    int start = (*midiPitchBend)[dIndex];
-                    int end   /*= 0;
-                               if (dIndex == 0)
-                               end = 127<<7;
-                               else
-                               end */= (*midiPitchBend)[dIndex-1];
-                    
-                    note_key_table.set(number, end + (start-end)*c);
-                }
-            }
-        }
-        for (int i = num; i < num+24; i++)
-        {
-            uint16 note = note_key_table[i];
-            if (note == OFFSTRING_NOTE)
-                std::cout << "NOTE OFF STRING\n";
-            else if (note == INVALID_NOTE)
-                std::cout << "INVALID NOTE\n";
-            else
-                std::cout << note << std::endl;
-        }
-        
+        // make table -- this could be in a background thread, meaning we could start the next one a bit sooner
+        // although while this is a lot of code, it isn't really that much heavy lifting
+        processFrequencies();
         
         analysisThreadRef->notify(); // let's get out of here
     }
@@ -432,6 +265,201 @@ void SwivelString::audioDeviceStopped()
 }
 
 //===============================================================================
+// populate final lookup table
+void SwivelString::processFrequencies()
+{
+    determined_pitch = calculateBestFrequency();
+    // now that we have the pitch of the string we can start doing some interpolation
+    // first step is to figure out where our newly determined fundamental fits within our measured data
+    int above = -1;
+    int below = -1;
+    
+    Array<double> derived_data; // make this here b/c it doesn't need to hand around beyond the construction of the lookup table
+    
+    for (int i = 0; i < fundamentals->size(); i++)
+    {
+        double current = (*fundamentals)[i];
+        
+        if (determined_pitch >= current)
+        {
+            if (below == -1)
+                below = i;
+            else if (current >= (*fundamentals)[below]) // finding nearest measurement underneath
+                below = i;
+        }
+        else // determined_pitch < current (finding nearest measurement above)
+        {
+            if (above == -1)
+                above = i;
+            else if (current < (*fundamentals)[above])  // nearest
+                above = i;
+        }
+    }
+    
+    // now we need to determine our interpolation constant, assuming linear interpolation
+    double lowest = (*fundamentals)[below];
+    double highest = (*fundamentals)[above];
+    double gapA = highest-lowest;
+    double gapB = determined_pitch - lowest;
+    double c = gapB / gapA;
+    
+    // now use c to fill in a lookup table of the extrapolated characteristics of the current tuning
+    Array<double>* low = (*measurements)[below];
+    Array<double>* high = (*measurements)[above]; // stupid asterisks are silly
+    
+    // temporary variables
+    double l;
+    double h;
+    double g;
+    double d;
+    double r;
+    for (int i = 0; i < low->size(); i++)
+    {
+        // just to check let's lay these out for now
+        l = (*low)[i];
+        h = (*high)[i];
+        g = h-l;
+        d = g*c;
+        r = l+d;
+        derived_data.add(r);
+        //std::cout << r<< std::endl;
+    }
+    
+    
+    // now we can try to construct a table of pitch bend values for virtual frets
+    // TODO how to extrapolate?
+    // TODO something better than linear interpolation for steps along the string
+    fillLookupTable(derived_data);
+    
+    /*for (int i = num; i < num+24; i++)
+     {
+     uint16 note = note_key_table[i];
+     if (note == OFFSTRING_NOTE)
+     std::cout << "NOTE OFF STRING\n";
+     else if (note == INVALID_NOTE)
+     std::cout << "INVALID NOTE\n";
+     else
+     std::cout << note << std::endl;
+     }*/
+}
+
+double SwivelString::calculateBestFrequency()
+{
+    
+    //probably an unnecessarily intimidating way to do this, but lambdas are fun
+    auto compare =
+    [] (double a, double b) -> int
+    {
+        if (b-a > 0)
+            return -1;
+        if (b-a < 0)
+            return 1;
+        else
+            return 0;
+    };
+    
+    ElementComparator<double> e(compare);
+    
+    freqs.sort(e);
+    
+    OwnedArray<Range> ranges; // a range is an tuple of lowest(double), highest(double), start index(int) and end(int)
+    ranges.add(new std::tuple<double, double, int, int>(freqs[0], 0.0, 0, 1));
+    
+    double threshold = 1.0; // maximum size of range
+    int rindex = 0;
+    for (int i = 1; i < freqs.size(); i++)
+    {
+        if ((freqs[i]-std::get<0>(*ranges[rindex])) < threshold)
+        {
+            std::get<3>(*ranges[rindex]) = i+1;
+            if ((freqs[i] - std::get<1>(*ranges[rindex])) > 0)
+                std::get<1>(*ranges[rindex]) = freqs[i];
+        }
+        else // this particular range is done
+        {
+            ranges.add(new Range(freqs[i], 0.0, i, i+1));
+            rindex++;
+        }
+    }
+    
+    // find the range with the most data
+    Range bestRange(0,0,0,0);
+    for (Range*& r : ranges)
+    {
+        if (std::get<3>(*r)-std::get<2>(*r) > std::get<3>(bestRange)-std::get<2>(bestRange))
+        {
+            bestRange = *r; // copy the best into bestRange
+        }
+    }
+    double total = 0;
+    for (int i = std::get<2>(bestRange); i < std::get<3>(bestRange); i++)
+    {
+        total += freqs[i];
+    }
+    
+    return total / (std::get<3>(bestRange)-std::get<2>(bestRange));
+}
+
+void SwivelString::fillLookupTable(Array<double>& derived_data)
+{
+    
+    // start by going through each target
+    int dIndex=0;
+    int number = num;
+    // we are going to make a two octave lookup table of pitch bend values by note numbers
+    int gtcount = 0; // how many times we've had to go over the top
+    for (int i = 0; i < targets->size(); i++,number++)
+    {
+        if ((*targets)[i] < determined_pitch) // we can't do much with values lower than the open string
+            note_key_table.set(number, INVALID_NOTE);
+        if ((*targets)[i] > derived_data[derived_data.size()-1]) // for now we will just take the gradient between the highest two
+        {
+            ++gtcount;
+            double m = note_key_table[number-gtcount] - note_key_table[number-gtcount-1]; // need to stop this wrapping
+            int amount = gtcount*m;
+            int result = note_key_table[number-gtcount] + amount; // store it in a signed int to clamp it easier
+            if (result < 0)
+            {
+                result = 0;
+            }
+            note_key_table.set(number, result);
+        }
+        else // must be greater than or equal to determined_pitch
+        {
+            double target = (*targets)[i];
+            while (target >= derived_data[dIndex])
+                dIndex++;
+            
+            if (dIndex == 0)
+            {
+                if (std::fabs(1-(target/determined_pitch)) < 0.001)
+                    note_key_table.set(number, OPEN_NOTE);
+                else
+                    note_key_table.set(number, OFFSTRING_NOTE);
+            }
+            else
+            {
+                double a = derived_data[dIndex] - derived_data[dIndex-1];
+                double b/* = 0;
+                         if (dIndex == 0)
+                         b = target - determined_pitch;
+                         else
+                         b */= target - derived_data[dIndex-1];
+                double c = b/a;
+                int start = (*midiPitchBend)[dIndex];
+                int end   /*= 0;
+                           if (dIndex == 0)
+                           end = 127<<7;
+                           else
+                           end */= (*midiPitchBend)[dIndex-1];
+                
+                note_key_table.set(number, end + (start-end)*c);
+            }
+        }
+    }
+}
+
+//===============================================================================
 /** Returns the current peaks */
 const Array<double>* SwivelString::getCurrentPeaksAsFrequencies() const
 {
@@ -537,7 +565,6 @@ bool SwivelString::isReadyToTransform() const
 void SwivelString::reset()
 {
     // undo calculations
-    derived_data.clear();
     determined_pitch = std::numeric_limits<double>::signaling_NaN();
     processing = false;
     gate = false;

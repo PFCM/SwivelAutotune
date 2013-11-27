@@ -115,11 +115,20 @@ private:
     double binToFreq(double bin);
     int freqToBin(double freq);
     double preciseBinToFreq(int bin, double phasedelta);
+    //=============================================
+    // takes the frequencies and populates the note lookup table
+    void processFrequencies();
+    // gets the best frequency from the calculated ones
+    double calculateBestFrequency();
+    // actually fill in note_key_table, takes an array of frequency estimates for the determined fundamental
+    void fillLookupTable(Array<double>& derived_data);
     
     //=============================================
     // some misc. internal variables etc
     bool bundleInit;
     bool audioInit;
+    
+    
     void finalInit();
     
     double delay;
@@ -131,19 +140,23 @@ private:
     double determined_pitch;
     
     // some constants to save time
+    // 1/PI, useful for the frequency calculation
     static constexpr double ONEDIVPI       = 1.0/M_PI;
+    // PI/2
     static constexpr double HALFPI         = 0.5*M_PI;
+    // An invalid note for some reason, most likely too high pitched for this string
     static constexpr uint8  INVALID_NOTE   = 0xff; // could be anything > 127
+    // A note too low for the string (or too low for the servo to reach)
     static constexpr uint8  OFFSTRING_NOTE = 0xfe;
+    // A note that is near enough to the open string that it is worth playing
+    static constexpr uint8  OPEN_NOTE      = 0xfd;
     
     //===============================================
     // some MIDI info
     int channel;
-    // the lookup table, derived from the measurements and the audio analysis
-    Array<double> derived_data;
     // the lookup table of notes to pitchbend values
     HashMap<uint8, uint16> note_key_table;
-    // beginning number
+    // beginning MIDI note number
     int num;
 };
 

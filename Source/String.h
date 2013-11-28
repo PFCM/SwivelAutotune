@@ -41,6 +41,7 @@ public:
     //===========================================
     /** Returns current list of peaks in Hz */
     const Array<double>* getCurrentPeaksAsFrequencies() const;
+    
     /** Returns the midi data required to make things go */
     const MidiBuffer* getMidiBuffer() const;
     
@@ -55,6 +56,12 @@ public:
     
     /** Returns true iff both initialisation routines have completed and the final initialisation succeeded */
     bool isFullyInitialised() const;
+    
+    /** Gets the current channel (default 0) */
+    int getAudioChannel() const;
+    
+    /** Sets the current channel */
+    void setAudioChannel(int newChan);
     
     //============================================
     // MIDI transformation functions
@@ -159,6 +166,8 @@ private:
     HashMap<uint8, uint16> note_key_table;
     // beginning MIDI note number
     int num;
+    // Audio channel index
+    int audioChannel;
 };
 
 #endif /* defined(__SwivelAutotune__String__) */

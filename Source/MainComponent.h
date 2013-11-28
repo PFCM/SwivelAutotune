@@ -18,7 +18,8 @@ class AnalysisThread;
 class MainComponent : public    Component,
                       private   ComboBox::Listener,
                                 Button::Listener,
-                                MidiInputCallback
+                                MidiInputCallback,
+                                ChangeListener
 {
     
 public:
@@ -31,6 +32,7 @@ public:
     //=============================================================
     void comboBoxChanged(ComboBox* box);
     void buttonClicked(Button* button);
+    void changeListenerCallback(ChangeBroadcaster* source);
     
     void handleIncomingMidiMessage(MidiInput* input, const MidiMessage& msg);
     
@@ -117,8 +119,11 @@ private:
     // for the audio tab
     ScopedPointer<Label> stringLabel;
     ScopedPointer<Label> channelLabel;
-    OwnedArray<TextButton> stringButtons;
-    OwnedArray<TextButton> channelButtons;
+    ScopedPointer<ComboBox> stringBox;
+    ScopedPointer<ComboBox> chanBox;
+    ScopedPointer<TextButton> chooseButton;
+    SwivelString* currentString;
+    int currentChanIndex;
     
     // data (this is shared between strings)
     double* audio;

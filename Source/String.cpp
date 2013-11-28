@@ -20,7 +20,7 @@
 // or awkwardness might ensue.
 // This shouldn't be a problem given if more than one string is grabbing the audio,
 // there are probably some other serious issues
-SwivelString::SwivelString()
+SwivelString::SwivelString() : channel(0)
 {
     bundleInit = false;
     audioInit = false;
@@ -130,9 +130,11 @@ void SwivelString::audioDeviceIOCallback(const float **inputChannelData,
                                          int numOutputChannels,
                                          int numSamples)
 {
+    if (audioChannel >= numInputChannels)
+        throw std::out_of_range("asked to process on non-existent channel");
     // we are only interested if there is a bit of sound
     float RMS =0;
-    vDSP_rmsqv(inputChannelData[0], 1, &RMS, numSamples);
+    vDSP_rmsqv(inputChannelData[audioChannel], 1, &RMS, numSamples);
     //std::cout << RMS <<std::endl;
     if (RMS >= rmsUp && gate == false)
     {
@@ -175,7 +177,7 @@ void SwivelString::audioDeviceIOCallback(const float **inputChannelData,
              input_buffer[input_index+i] = inputChannelData[0][i];
              }*/
             // convert to double
-            vDSP_vspdp(inputChannelData[0], 1,       // input, stride
+            vDSP_vspdp(inputChannelData[audioChannel], 1,       // input, stride
                        input_buffer+input_index, 1,  // output, stride
                        numSamples);                  // size
             input_index += numSamples;
@@ -573,6 +575,16 @@ double SwivelString::getWaitTime() const
 int SwivelString::getMidiChannel() const
 {
     return channel;
+}
+
+int SwivelString::getAudioChannel() const
+{
+    return audioChannel;
+}
+
+void SwivelString::setAudioChannel(int newChan)
+{
+    audioChannel = newChan;
 }
 
 bool SwivelString::isReadyToTransform() const

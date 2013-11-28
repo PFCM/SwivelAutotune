@@ -12,13 +12,14 @@
 using namespace std;
 
 //==============================================================================================
-MainComponent::MainComponent() : running(false)
+MainComponent::MainComponent() : currentString(nullptr), currentChanIndex(-1), running(false)
 {
     setSize(700, 330);
     
     tabs = new TabbedComponent(TabbedButtonBar::Orientation::TabsAtTop);
-    tabs->setSize(700,320);
+    tabs->setSize(700,330);
     addAndMakeVisible(tabs);
+    tabs->getTabbedButtonBar().addChangeListener(this);
     
     mainTab = new Component();
     mainTab->setSize(700, 300);
@@ -32,14 +33,16 @@ MainComponent::MainComponent() : running(false)
     deviceManager = new AudioDeviceManager();
     deviceManager->initialise(2, 0, nullptr, true);
     audioSelector = new AudioDeviceSelectorComponent(*deviceManager,
-                                                     2, 2, //input
+                                                     1, 32, //input
                                                      0, 0, //output
                                                      false,
                                                      false,
-                                                     true,
+                                                     false,
                                                      true);
     audioSelector->setBounds(0, 10, 300, 300);
     mainTab->addAndMakeVisible(audioSelector);
+    
+    
     
     
     //==========================================================================================
@@ -93,7 +96,7 @@ MainComponent::MainComponent() : running(false)
     
     // onset detection
     onsetThresholdUpLabel = new Label("OT Up", "Up Threshold");
-    onsetThresholdUpLabel->setBounds(110, 100, 100, 20);
+    onsetThresholdUpLabel->setBounds(410, 100, 100, 20);
     mainTab->addAndMakeVisible(onsetThresholdUpLabel);
     
     onsetThresholdUp = new TextEditor("Onset Threshold Up");
@@ -101,13 +104,13 @@ MainComponent::MainComponent() : running(false)
     onsetThresholdUp->setReadOnly(false);
     onsetThresholdUp->setCaretVisible(true);
     onsetThresholdUp->setInputFilter(new TextEditor::LengthAndCharacterRestriction(-1,"0123456789."), true);
-    onsetThresholdUp->setBounds(110, 120, 100, 20);
+    onsetThresholdUp->setBounds(410, 120, 100, 20);
     onsetThresholdUp->setText("0.001");
     mainTab->addAndMakeVisible(onsetThresholdUp);
     
     
     onsetThresholdDownLabel = new Label("OT Down", "Down Threshold");
-    onsetThresholdDownLabel->setBounds(210, 100, 100, 20);
+    onsetThresholdDownLabel->setBounds(510, 100, 100, 20);
     mainTab->addAndMakeVisible(onsetThresholdDownLabel);
     
     onsetThresholdDown = new TextEditor("Onset Threshold Up");
@@ -115,7 +118,7 @@ MainComponent::MainComponent() : running(false)
     onsetThresholdDown->setReadOnly(false);
     onsetThresholdDown->setCaretVisible(true);
     onsetThresholdDown->setInputFilter(new TextEditor::LengthAndCharacterRestriction(-1,"0123456789."), true);
-    onsetThresholdDown->setBounds(210, 120, 100, 20);
+    onsetThresholdDown->setBounds(510, 120, 100, 20);
     onsetThresholdDown->setText("0.001");
     mainTab->addAndMakeVisible(onsetThresholdDown);
     
@@ -141,7 +144,7 @@ MainComponent::MainComponent() : running(false)
     midiThroughButton = new TextButton("Start MIDI Thru", "Begins receiving MIDI and sending it through, transforming it if necessary");
     midiThroughButton->setBounds(2*getWidth()/3-100, 190, 200, 30);
     midiThroughButton->addListener(this);
-    mainTab->addAndMakeVisible(midiThroughButton);
+    addAndMakeVisible(midiThroughButton);
     
     //=========================================================================================
     // file chooser button
@@ -156,7 +159,7 @@ MainComponent::MainComponent() : running(false)
     goButton = new TextButton("GO");
     goButton->setBounds(getWidth()/3 - 100, 190, 200, 30);
     goButton->addListener(this);
-    mainTab->addAndMakeVisible(goButton);
+    addAndMakeVisible(goButton);
     
     //console
     console = new TextEditor("Console");
@@ -164,17 +167,34 @@ MainComponent::MainComponent() : running(false)
     console->setReadOnly(true);
     console->setCaretVisible(false);
     console->setBounds(10, 220, 680, 70);
-    mainTab->addAndMakeVisible(console);
+    /*mainTab->*/addAndMakeVisible(console);
     
     
     //==========================================================================================
     // audio tab
     
-    stringLabel = new Label("StringLabel", "Strings");
-    stringLabel->setBounds(20, 20, 100, 10);
+    stringLabel = new Label("StringLabel", "Strings (by MIDI channel)");
+    stringLabel->setBounds(20, 20, 100, 20);
     audioTab->addAndMakeVisible(stringLabel);
     
+    channelLabel = new Label("ChannelLabel", "Channels");
+    channelLabel->setBounds(300, 20, 100, 20);
+    audioTab->addAndMakeVisible(channelLabel);
     
+    stringBox = new ComboBox("StringChooser");
+    stringBox->setBounds(20,45,100,30);
+    audioTab->addAndMakeVisible(stringBox);
+    stringBox->addListener(this);
+    
+    chanBox = new ComboBox("ChannelChooser");
+    chanBox->setBounds(300, 45, 100, 30);
+    audioTab->addAndMakeVisible(chanBox);
+    chanBox->addListener(this);
+    
+    chooseButton = new TextButton("Link");
+    chooseButton->setBounds(165, 45, 100, 30);
+    chooseButton->addListener(this);
+    audioTab->addAndMakeVisible(chooseButton);
 }
 
 MainComponent::~MainComponent()
@@ -234,6 +254,20 @@ void MainComponent::comboBoxChanged(juce::ComboBox *box)
                 break;
         }
     }
+    else if (chanBox == box)
+        currentChanIndex = chanBox->getSelectedItemIndex();
+    else if (stringBox == box)
+    {
+        int chan = stringBox->getItemText(stringBox->getSelectedItemIndex()).getIntValue();
+        for (int i  = 0; i < swivelStrings.size(); i++)
+        {
+            if (swivelStrings[i]->getMidiChannel() == chan)
+            {
+                currentString = swivelStrings[i];
+                break;
+            }
+        }
+    }
 }
 
 void MainComponent::buttonClicked(juce::Button *button)
@@ -266,6 +300,42 @@ void MainComponent::buttonClicked(juce::Button *button)
         {
             button->setButtonText("Start MIDI Thru");
             midiInBox->removeMidiInputCallback(this);
+        }
+    }
+    else if (chooseButton == button)
+    {
+        if (currentChanIndex != -1 && currentString != nullptr)
+        {
+            currentString->setAudioChannel(currentChanIndex);
+            log("String on channel: " + String(currentString->getMidiChannel()) + " set to audio channel: " + String(currentChanIndex) + "\n", console);
+        }
+        else
+            log("Did nothing, need to select a channel and a string\n", console);
+    }
+}
+
+void MainComponent::changeListenerCallback(juce::ChangeBroadcaster *source)
+{
+    if (source == &tabs->getTabbedButtonBar())
+    {
+        if (tabs->getCurrentContentComponent() == audioTab)
+        {
+            StringArray names = deviceManager->getCurrentAudioDevice()->getInputChannelNames();
+            chanBox->addItemList(names, 1);
+            
+            if (swivelStrings.size() != 0)
+                for (int i = 0; i < swivelStrings.size(); i++)
+                {
+                    stringBox->addItem(String(swivelStrings[i]->getMidiChannel()), i+1);
+                }
+        }
+        else
+        {
+            chanBox->clear(NotificationType::dontSendNotification);
+            stringBox->clear(NotificationType::dontSendNotification);
+            
+            currentChanIndex = -1;
+            currentString = nullptr;
         }
     }
 }

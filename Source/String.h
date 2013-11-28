@@ -123,7 +123,6 @@ private:
     double calculateBestFrequency();
     // actually fill in note_key_table, takes an array of frequency estimates for the determined fundamental
     void fillLookupTable(Array<double>& derived_data);
-    
     //=============================================
     // some misc. internal variables etc
     bool bundleInit;
@@ -146,12 +145,12 @@ private:
     // PI/2
     static constexpr double HALFPI         = 0.5*M_PI;
     // An invalid note for some reason, most likely too high pitched for this string
-    static constexpr uint8  INVALID_NOTE   = 0xff; // could be anything > 127
+    static constexpr uint16  INVALID_NOTE   = 0xffff; // could be anything > 16384
     // A note too low for the string (or too low for the servo to reach)
-    static constexpr uint8  OFFSTRING_NOTE = 0xfe;
+    static constexpr uint16  OFFSTRING_NOTE = 0xfffe;
     // A note that is near enough to the open string that it is worth playing
-    static constexpr uint8  OPEN_NOTE      = 0xfd;
-    // returns distance on cents (100th of an equal-tempered semitone)
+    static constexpr uint16  OPEN_NOTE      = 0xfffd;
+    // returns distance in cents (100th of an equal-tempered semitone)
     static double cents(double a, double b);
     //===============================================
     // some MIDI info

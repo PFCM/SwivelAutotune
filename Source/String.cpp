@@ -605,7 +605,7 @@ void SwivelString::reset()
 
 MidiMessage SwivelString::transform(const juce::MidiMessage &msg) const
 {
-    static uint8 current_note;
+    static uint16 current_note = 0xff; // extra 8 bits tell debugger that this is not a character
     
     const uint8* data = msg.getRawData();
 #ifdef DEBUG // do some double checking
@@ -641,7 +641,7 @@ MidiMessage SwivelString::transform(const juce::MidiMessage &msg) const
         // for now it won't quite
         // range of input is 0-16384 (0-2^14)
         // we can divide into 4 sections of 4096 for each semitone and interpolate appropriately for each
-        // TODO propoerly deal with notes outside the range in note_key_table
+        // TODO properly deal with notes outside the range in note_key_table
         uint16 target = 0;
         uint16 start = 0;
         double c = 0;
@@ -670,6 +670,11 @@ MidiMessage SwivelString::transform(const juce::MidiMessage &msg) const
             target = note_key_table[current_note-2];
             start = note_key_table[current_note-1];
         }
+        // check our values are ok
+        if (target == INVALID_NOTE || target == OFFSTRING_NOTE || target == OPEN_NOTE)
+            target = note_key_table[current_note];
+        if (start == INVALID_NOTE || start == OFFSTRING_NOTE || target == OPEN_NOTE)
+            start = note_key_table[current_note];
         
         uint16 val = start + (start-target)*c;
         // now pack into a midi message
@@ -698,4 +703,3 @@ MidiMessage SwivelString::transform(const juce::MidiMessage &msg) const
     
     return MidiMessage(); // default exit point does nothing just makes sure it compiles
 }
-

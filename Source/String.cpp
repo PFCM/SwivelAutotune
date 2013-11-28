@@ -61,7 +61,7 @@ void SwivelString::initialiseFromBundle(SwivelStringFileParser::StringDataBundle
         finalInit();
 }
 // initialises audio requirements
-void SwivelString::initialiseAudioParameters(fftw_plan p, double *in, fftw_complex *out, int fft_size, double sr, int ol)
+void SwivelString::initialiseAudioParameters(fftw_plan p, double *in, fftw_complex *out, int fft_size, double sr, int ol, double upT, double downT)
 {
     fft_plan = p;
     input = in;
@@ -78,6 +78,9 @@ void SwivelString::initialiseAudioParameters(fftw_plan p, double *in, fftw_compl
     
     minBin = -1;
     maxBin = -1;
+    
+    rmsUp = upT;
+    rmsDown = downT;
     
     audioInit = true;
     
@@ -131,13 +134,13 @@ void SwivelString::audioDeviceIOCallback(const float **inputChannelData,
     float RMS =0;
     vDSP_rmsqv(inputChannelData[0], 1, &RMS, numSamples);
     //std::cout << RMS <<std::endl;
-    if (RMS >= 0.001 && gate == false)
+    if (RMS >= rmsUp && gate == false)
     {
         processing = true;
         gate = true;
         std::cout << "bang" <<std::endl;
     }
-    if (freqs.size() >= 20 || (RMS <= 0.001 && gate == true))
+    if (freqs.size() >= 20 || (RMS <= rmsDown && gate == true))
     {
         processing = false;
         gate = false;

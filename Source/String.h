@@ -36,7 +36,7 @@ public:
     void audioDeviceAboutToStart(AudioIODevice* device);
     void audioDeviceStopped();
     void initialiseFromBundle(SwivelStringFileParser::StringDataBundle* bundle);
-    void initialiseAudioParameters(fftw_plan, double* input, fftw_complex* output, int fft_size, double sr, int ol);
+    void initialiseAudioParameters(fftw_plan, double* input, fftw_complex* output, int fft_size, double sr, int ol, double upThresh, double downThresh);
     
     //===========================================
     /** Returns current list of peaks in Hz */
@@ -103,6 +103,7 @@ private:
     int overlap;
     int hop_size;
     int minBin, maxBin;
+    double rmsUp, rmsDown;
     double* input_buffer;
     double* magnitudes;
     Array<int, CriticalSection> peaks;

@@ -77,6 +77,34 @@ MainComponent::MainComponent() : running(false)
     windowBox->addListener(this);
     addAndMakeVisible(windowBox);
     
+    // onset detection
+    onsetThresholdUpLabel = new Label("OT Up", "Up Threshold");
+    onsetThresholdUpLabel->setBounds(110, 100, 100, 20);
+    addAndMakeVisible(onsetThresholdUpLabel);
+    
+    onsetThresholdUp = new TextEditor("Onset Threshold Up");
+    onsetThresholdUp->setMultiLine(false);
+    onsetThresholdUp->setReadOnly(false);
+    onsetThresholdUp->setCaretVisible(true);
+    onsetThresholdUp->setInputFilter(new TextEditor::LengthAndCharacterRestriction(-1,"0123456789."), true);
+    onsetThresholdUp->setBounds(110, 120, 100, 20);
+    onsetThresholdUp->setText("0.001");
+    addAndMakeVisible(onsetThresholdUp);
+    
+    
+    onsetThresholdDownLabel = new Label("OT Down", "Down Threshold");
+    onsetThresholdDownLabel->setBounds(210, 100, 100, 20);
+    addAndMakeVisible(onsetThresholdDownLabel);
+    
+    onsetThresholdDown = new TextEditor("Onset Threshold Up");
+    onsetThresholdDown->setMultiLine(false);
+    onsetThresholdDown->setReadOnly(false);
+    onsetThresholdDown->setCaretVisible(true);
+    onsetThresholdDown->setInputFilter(new TextEditor::LengthAndCharacterRestriction(-1,"0123456789."), true);
+    onsetThresholdDown->setBounds(210, 120, 100, 20);
+    onsetThresholdDown->setText("0.001");
+    addAndMakeVisible(onsetThresholdDown);
+    
     
     //========================================================================================
     // midi out
@@ -129,6 +157,10 @@ MainComponent::MainComponent() : running(false)
 MainComponent::~MainComponent()
 {
     // only one of these, only destroyed when application exits
+    // all we need to do is check background threads are stopped
+    midiOutBox->getSelectedOutput()->stopBackgroundThread();
+    if (analysisThread != nullptr && analysisThread->isThreadRunning())
+        analysisThread->stopThread(100);
 }
 
 //==============================================================================================
@@ -231,7 +263,7 @@ void MainComponent::begin()
 #ifdef DEBUG
     analysisThread->setConsole(console);
 #endif
-    analysisThread->setFFTParams(fft_size, overlap);
+    analysisThread->setProcessingParams(fft_size, overlap, onsetThresholdUp->getText().getFloatValue(), onsetThresholdDown->getText().getFloatValue());
     // BEGIN
     // MOVED THIS TO OTHER THREAD
 /*    // allocate space for audio
@@ -302,8 +334,8 @@ void MainComponent::end(bool success)
 
 void MainComponent::endPrematurely()
 {
-    log("Ending, will probably cause analysis thread to crash\n", console);
-    analysisThread->stopThread(1);
+    log("Ending, may cause analysis thread to crash\n", console);
+    analysisThread->stopThread(15000);
 }
 
 
@@ -368,6 +400,13 @@ void MainComponent::openFile()
         {
             Array<StringDataBundle*>* data = SwivelStringFileParser::parseFile(chosen);
             
+            
+            // make sure midi is stopped or possible badness
+            if (midiThroughButton->getButtonText() == "Stop MIDI Thru")
+                midiInBox->removeMidiInputCallback(this);
+            swivelStrings.clear(true);
+            bundles.clear(true);
+            
             for (int i = 0; i < data->size(); i++)
             {
                 StringDataBundle* bundle = data->getReference(i);
@@ -396,7 +435,6 @@ void MainComponent::openFile()
             
             bundles.addArray(*data);
             
-            swivelStrings.clear(true);
             
             log("Initialising strings\n", console);
             for (int i = 0; i < bundles.size(); i++)
@@ -418,7 +456,7 @@ void MainComponent::openFile()
 File MainComponent::showDialogue(const juce::String &pattern)
 {
     FileChooser chooser("Choose file", // title
-                        File::getSpecialLocation(File::userDocumentsDirectory), // directory
+                        File::getCurrentWorkingDirectory(), // directory
                         pattern); // pattern (also bool to use native dialog, default true)
     
     if (chooser.browseForFileToOpen())

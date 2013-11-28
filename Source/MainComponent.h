@@ -74,6 +74,11 @@ private:
     const int NUM_OVERLAPS = 4;
     int overlap = 2;
     
+    ScopedPointer<Label> onsetThresholdUpLabel;
+    ScopedPointer<TextEditor> onsetThresholdUp;
+    ScopedPointer<Label> onsetThresholdDownLabel;
+    ScopedPointer<TextEditor> onsetThresholdDown;
+    
     // window
     ScopedPointer<Label> windowLabel;
     ScopedPointer<ComboBox> windowBox;

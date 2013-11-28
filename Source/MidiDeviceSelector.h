@@ -41,7 +41,7 @@ public:
         Probably should not use this directly, it would be safer to register
         a callback with this object.
     */
-    MidiInput* getSeletedInput();
+    MidiInput* getSelectedInput();
     
     void comboBoxChanged(ComboBox* changed);
     void handleIncomingMidiMessage(MidiInput* source, const MidiMessage &message);

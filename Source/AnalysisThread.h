@@ -35,8 +35,8 @@ public:
     
     /** Sets the console to use for output. If nullptr nothing is output */
     void setConsole(TextEditor* where);
-    /** Sets the FFT size and overlap (in that order)*/
-    void setFFTParams(int size, int overlap);
+    /** Sets the FFT size and overlap, onset threshold up and onset threshold down (in that order)*/
+    void setProcessingParams(int size, int overlap, double rmsUp, double rmsDown);
     
     class AnalysisEndMessage : public CallbackMessage
     {
@@ -65,6 +65,8 @@ private:
     int overlap;
     int hop_size;
     bool failed;
+    double rmsUp;
+    double rmsDown;
     
     
     void log(String message);

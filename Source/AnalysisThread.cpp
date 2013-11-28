@@ -63,7 +63,9 @@ void AnalysisThread::run()
         if (current->isReadyToTransform()) // then this must have been done before
             current->reset();
         // make sure they're good to go on the audio front
-        current->initialiseAudioParameters(plan, audio, spectrum, fft_size, deviceManager->getCurrentAudioDevice()->getCurrentSampleRate(), overlap);
+        current->initialiseAudioParameters(plan, audio, spectrum, fft_size,
+                                           deviceManager->getCurrentAudioDevice()->getCurrentSampleRate(),
+                                           overlap, rmsUp, rmsDown);
         // make sure we're good to go
         if (!current->isFullyInitialised())
         {
@@ -127,12 +129,15 @@ void AnalysisThread::setConsole(TextEditor* where)
     console = where;
 }
 
-void AnalysisThread::setFFTParams(int size, int overlap)
+void AnalysisThread::setProcessingParams(int size, int overlap, double upThresh, double downThresh)
 {
     fft_size = size;
     this->overlap = overlap; // just to be clear
     
     hop_size = fft_size/overlap;
+    
+    rmsUp   = upThresh;
+    rmsDown = downThresh;
 }
 
 //=====================================================================================================================

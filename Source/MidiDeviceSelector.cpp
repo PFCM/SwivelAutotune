@@ -72,3 +72,8 @@ void MidiInputDeviceSelector::removeMidiInputCallback(juce::MidiInputCallback *o
 {
     callbacks.removeFirstMatchingValue(oldCallback);
 }
+
+MidiInput* MidiInputDeviceSelector::getSelectedInput()
+{
+    return inputDevice.get();
+}

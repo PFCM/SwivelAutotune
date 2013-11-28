@@ -7,7 +7,6 @@
 //
 
 #include "SwivelStringFileParser.h"
-#include <regex>
 
 
 Array<SwivelStringFileParser::StringDataBundle*>* SwivelStringFileParser::parseFile(const juce::File& f)

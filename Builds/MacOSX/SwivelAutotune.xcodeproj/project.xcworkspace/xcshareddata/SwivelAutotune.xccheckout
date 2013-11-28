@@ -1,0 +1,41 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE plist PUBLIC "-//Apple//DTD PLIST 1.0//EN" "http://www.apple.com/DTDs/PropertyList-1.0.dtd">
+<plist version="1.0">
+<dict>
+	<key>IDESourceControlProjectFavoriteDictionaryKey</key>
+	<false/>
+	<key>IDESourceControlProjectIdentifier</key>
+	<string>726173AE-2CF6-4C9A-8AA2-AB549521C3DF</string>
+	<key>IDESourceControlProjectName</key>
+	<string>SwivelAutotune</string>
+	<key>IDESourceControlProjectOriginsDictionary</key>
+	<dict>
+		<key>5645B9D4-9B24-47A3-BD25-ED4C79193264</key>
+		<string>https://github.com/PFCM/SwivelAutotune</string>
+	</dict>
+	<key>IDESourceControlProjectPath</key>
+	<string>Builds/MacOSX/SwivelAutotune.xcodeproj/project.xcworkspace</string>
+	<key>IDESourceControlProjectRelativeInstallPathDictionary</key>
+	<dict>
+		<key>5645B9D4-9B24-47A3-BD25-ED4C79193264</key>
+		<string>../../../..</string>
+	</dict>
+	<key>IDESourceControlProjectURL</key>
+	<string>https://github.com/PFCM/SwivelAutotune</string>
+	<key>IDESourceControlProjectVersion</key>
+	<integer>110</integer>
+	<key>IDESourceControlProjectWCCIdentifier</key>
+	<string>5645B9D4-9B24-47A3-BD25-ED4C79193264</string>
+	<key>IDESourceControlProjectWCConfigurations</key>
+	<array>
+		<dict>
+			<key>IDESourceControlRepositoryExtensionIdentifierKey</key>
+			<string>public.vcs.git</string>
+			<key>IDESourceControlWCCIdentifierKey</key>
+			<string>5645B9D4-9B24-47A3-BD25-ED4C79193264</string>
+			<key>IDESourceControlWCCName</key>
+			<string>SwivelAutotune</string>
+		</dict>
+	</array>
+</dict>
+</plist>

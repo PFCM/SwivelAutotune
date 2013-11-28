@@ -50,6 +50,13 @@ private:
     typedef SwivelStringFileParser::StringDataBundle StringDataBundle;
     
     //GUI stuff
+    // tabs are good right
+    ScopedPointer<TabbedComponent> tabs;
+    // this guy holds pretty much everything
+    ScopedPointer<Component> mainTab;
+    // this guy is for audio routing
+    ScopedPointer<Component> audioTab;
+    
     ScopedPointer<AudioDeviceManager> deviceManager;
     ScopedPointer<AudioDeviceSelectorComponent> audioSelector; // this exists
     
@@ -105,6 +112,13 @@ private:
     ScopedPointer<TextButton> chooseFileButton;
     // we need some collection to hold the data
     OwnedArray<StringDataBundle> bundles;
+    
+    
+    // for the audio tab
+    ScopedPointer<Label> stringLabel;
+    ScopedPointer<Label> channelLabel;
+    OwnedArray<TextButton> stringButtons;
+    OwnedArray<TextButton> channelButtons;
     
     // data (this is shared between strings)
     double* audio;

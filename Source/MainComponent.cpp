@@ -14,7 +14,21 @@ using namespace std;
 //==============================================================================================
 MainComponent::MainComponent() : running(false)
 {
-    setSize(700, 300);
+    setSize(700, 330);
+    
+    tabs = new TabbedComponent(TabbedButtonBar::Orientation::TabsAtTop);
+    tabs->setSize(700,320);
+    addAndMakeVisible(tabs);
+    
+    mainTab = new Component();
+    mainTab->setSize(700, 300);
+    tabs->addTab("Main", Colours::lightgrey, mainTab, false);
+    
+    audioTab = new Component();
+    mainTab->setSize(700, 300);
+    tabs->addTab("Input Routing", Colours::lightblue, audioTab, false);
+    
+    //==========================================================================================
     deviceManager = new AudioDeviceManager();
     deviceManager->initialise(2, 0, nullptr, true);
     audioSelector = new AudioDeviceSelectorComponent(*deviceManager,
@@ -25,7 +39,7 @@ MainComponent::MainComponent() : running(false)
                                                      true,
                                                      true);
     audioSelector->setBounds(0, 10, 300, 300);
-    addAndMakeVisible(audioSelector);
+    mainTab->addAndMakeVisible(audioSelector);
     
     
     //==========================================================================================
@@ -33,7 +47,7 @@ MainComponent::MainComponent() : running(false)
     fftLabel = new Label("FFT Label", "FFT Size");
     fftLabel->setEditable(false);
     fftLabel->setBounds(310, 10, 100, 20);
-    addAndMakeVisible(fftLabel);
+    mainTab->addAndMakeVisible(fftLabel);
     fftSizeBox = new ComboBox("FFT Size");
     for (int i =0; i < NUM_FFT_SIZES; i++)
     {
@@ -42,13 +56,13 @@ MainComponent::MainComponent() : running(false)
     fftSizeBox->setBounds(310, 30, 100, 20);
     fftSizeBox->setSelectedId(5);
     fftSizeBox->addListener(this);
-    addAndMakeVisible(fftSizeBox);
+    mainTab->addAndMakeVisible(fftSizeBox);
     
     //overlap
     overlapLabel = new Label("Overlap Label", "Overlap");
     overlapLabel->setEditable(false);
     overlapLabel->setBounds(310, 55, 100, 20);
-    addAndMakeVisible(overlapLabel);
+    mainTab->addAndMakeVisible(overlapLabel);
     overlapBox = new ComboBox("Overlap Amount");
     overlapBox->setTooltip(String("The amount of overlap between successive FFT frames.\n") +
                            "1 is no overlap, 4 means that the origin of the analysis\n" +
@@ -60,12 +74,12 @@ MainComponent::MainComponent() : running(false)
     overlapBox->setBounds(310, 75, 100, 20);
     overlapBox->setSelectedId(2);
     overlapBox->addListener(this);
-    addAndMakeVisible(overlapBox);
+    mainTab->addAndMakeVisible(overlapBox);
     
     // windowing
     windowLabel = new Label("Windowing", "Windowing");
     windowLabel->setBounds(310, 100, 100, 20);
-    addAndMakeVisible(windowLabel);
+    mainTab->addAndMakeVisible(windowLabel);
     windowBox = new ComboBox("Window Box");
     windowBox->addItem("Hann", WindowType::HANN);
     windowBox->addItem("Hamming", WindowType::HAMMING);
@@ -75,12 +89,12 @@ MainComponent::MainComponent() : running(false)
     windowBox->setBounds(310, 120, 100, 20);
     windowBox->setSelectedId(WindowType::HANN);
     windowBox->addListener(this);
-    addAndMakeVisible(windowBox);
+    mainTab->addAndMakeVisible(windowBox);
     
     // onset detection
     onsetThresholdUpLabel = new Label("OT Up", "Up Threshold");
     onsetThresholdUpLabel->setBounds(110, 100, 100, 20);
-    addAndMakeVisible(onsetThresholdUpLabel);
+    mainTab->addAndMakeVisible(onsetThresholdUpLabel);
     
     onsetThresholdUp = new TextEditor("Onset Threshold Up");
     onsetThresholdUp->setMultiLine(false);
@@ -89,12 +103,12 @@ MainComponent::MainComponent() : running(false)
     onsetThresholdUp->setInputFilter(new TextEditor::LengthAndCharacterRestriction(-1,"0123456789."), true);
     onsetThresholdUp->setBounds(110, 120, 100, 20);
     onsetThresholdUp->setText("0.001");
-    addAndMakeVisible(onsetThresholdUp);
+    mainTab->addAndMakeVisible(onsetThresholdUp);
     
     
     onsetThresholdDownLabel = new Label("OT Down", "Down Threshold");
     onsetThresholdDownLabel->setBounds(210, 100, 100, 20);
-    addAndMakeVisible(onsetThresholdDownLabel);
+    mainTab->addAndMakeVisible(onsetThresholdDownLabel);
     
     onsetThresholdDown = new TextEditor("Onset Threshold Up");
     onsetThresholdDown->setMultiLine(false);
@@ -103,38 +117,38 @@ MainComponent::MainComponent() : running(false)
     onsetThresholdDown->setInputFilter(new TextEditor::LengthAndCharacterRestriction(-1,"0123456789."), true);
     onsetThresholdDown->setBounds(210, 120, 100, 20);
     onsetThresholdDown->setText("0.001");
-    addAndMakeVisible(onsetThresholdDown);
+    mainTab->addAndMakeVisible(onsetThresholdDown);
     
     
     //========================================================================================
     // midi out
     midiOutBox = new MidiOutputDeviceSelector("Midi Out Box");
     midiOutBox->setBounds(420, 30, 100, 20);
-    addAndMakeVisible(midiOutBox);
+    mainTab->addAndMakeVisible(midiOutBox);
     midiOutLabel = new Label("Midi out label", "MIDI Out: ");
     midiOutLabel->setBounds(420, 10, 100, 20);
-    addAndMakeVisible(midiOutLabel);
+    mainTab->addAndMakeVisible(midiOutLabel);
     
     //midi in
     midiInLabel = new Label("Midi in label", "MIDI In: ");
     midiInLabel->setBounds(420, 55, 100, 20);
     midiInBox = new MidiInputDeviceSelector("Midi In Box");
     midiInBox->setBounds(420, 75, 100, 20);
-    addAndMakeVisible(midiInLabel);
-    addAndMakeVisible(midiInBox);
+    mainTab->addAndMakeVisible(midiInLabel);
+    mainTab->addAndMakeVisible(midiInBox);
     
     //midi thru
     midiThroughButton = new TextButton("Start MIDI Thru", "Begins receiving MIDI and sending it through, transforming it if necessary");
     midiThroughButton->setBounds(2*getWidth()/3-100, 190, 200, 30);
     midiThroughButton->addListener(this);
-    addAndMakeVisible(midiThroughButton);
+    mainTab->addAndMakeVisible(midiThroughButton);
     
     //=========================================================================================
     // file chooser button
     chooseFileButton = new TextButton("Choose Data File");
     chooseFileButton->setBounds(getWidth()-100, 10, 80, 20);
     chooseFileButton->addListener(this);
-    addAndMakeVisible(chooseFileButton);
+    mainTab->addAndMakeVisible(chooseFileButton);
     
     
     //=========================================================================================
@@ -142,7 +156,7 @@ MainComponent::MainComponent() : running(false)
     goButton = new TextButton("GO");
     goButton->setBounds(getWidth()/3 - 100, 190, 200, 30);
     goButton->addListener(this);
-    addAndMakeVisible(goButton);
+    mainTab->addAndMakeVisible(goButton);
     
     //console
     console = new TextEditor("Console");
@@ -150,7 +164,16 @@ MainComponent::MainComponent() : running(false)
     console->setReadOnly(true);
     console->setCaretVisible(false);
     console->setBounds(10, 220, 680, 70);
-    addAndMakeVisible(console);
+    mainTab->addAndMakeVisible(console);
+    
+    
+    //==========================================================================================
+    // audio tab
+    
+    stringLabel = new Label("StringLabel", "Strings");
+    stringLabel->setBounds(20, 20, 100, 10);
+    audioTab->addAndMakeVisible(stringLabel);
+    
     
 }
 
